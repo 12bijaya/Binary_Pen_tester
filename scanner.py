@@ -2341,6 +2341,19 @@ class BinaryVulnScannerGUI:
             fg='white'
         ).pack(side=tk.LEFT, padx=5)
         
+        disasm_frame = tk.Frame(frame)
+        disasm_frame.pack(fill=tk.X, padx=10, pady=5)
+        tk.Label(disasm_frame, text="Disassemble function (Intel syntax, like GDB):", font=('Arial', 10)).pack(side=tk.LEFT, padx=(0, 8))
+        self.disasm_func_combo = ttk.Combobox(disasm_frame, state='readonly', width=30)
+        self.disasm_func_combo.pack(side=tk.LEFT, padx=5)
+        tk.Button(
+            disasm_frame,
+            text="View disassembly (Intel)",
+            command=self.show_disassembly_intel,
+            bg='#9b59b6',
+            fg='white'
+        ).pack(side=tk.LEFT, padx=5)
+        
         self.analysis_text = scrolledtext.ScrolledText(
             frame,
             wrap=tk.WORD,
@@ -3072,9 +3085,79 @@ class BinaryVulnScannerGUI:
                 text += "-" * 40 + "\n"
                 for func in symbols['functions'][:15]:
                     text += f"{func['address']:>10} {func['name']}\n"
+                func_names = [f['name'] for f in symbols['functions']]
+                self.disasm_func_combo['values'] = func_names
+                if func_names:
+                    self.disasm_func_combo.current(0)
+                    if 'main' in func_names:
+                        try:
+                            self.disasm_func_combo.current(func_names.index('main'))
+                        except Exception:
+                            pass
+            else:
+                self.disasm_func_combo['values'] = []
+        else:
+            self.disasm_func_combo['values'] = []
         
         self.analysis_text.insert(tk.END, text)
         self.analysis_text.config(state='disabled')
+    
+    def show_disassembly_intel(self):
+        """Show full disassembly of the binary in Intel syntax (like GDB: objdump -d -M intel)."""
+        if not self.binary_path:
+            messagebox.showwarning("Warning", "Please load a binary file first!")
+            return
+        
+        func_name = self.disasm_func_combo.get().strip() if self.disasm_func_combo.get() else ""
+        scroll_to_addr = None
+        if self.analyzer and self.analyzer.info and func_name:
+            symbols = self.analyzer.info.get('symbols', {}).get('functions', [])
+            for f in symbols:
+                if f.get('name') == func_name:
+                    addr = f.get('address', '')
+                    if addr and addr.startswith('0x'):
+                        scroll_to_addr = addr[2:].lstrip('0') or '0'
+                    break
+        
+        def run_objdump():
+            try:
+                result = subprocess.run(
+                    ['objdump', '-d', '-M', 'intel', self.binary_path],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    errors='replace'
+                )
+                output = result.stdout if result.returncode == 0 else (result.stderr or result.stdout or "No output.")
+                if not output.strip():
+                    output = "Disassembly returned no output. Ensure objdump (binutils) is installed: apt install binutils"
+                self.root.after(0, lambda: self._show_disassembly_window(output, scroll_to_addr, func_name or os.path.basename(self.binary_path)))
+            except subprocess.TimeoutExpired:
+                self.root.after(0, lambda: self._show_disassembly_window("Disassembly timed out.", None, ""))
+            except FileNotFoundError:
+                self.root.after(0, lambda: self._show_disassembly_window("objdump not found. Please install binutils (e.g. apt install binutils).", None, ""))
+            except Exception as e:
+                self.root.after(0, lambda: self._show_disassembly_window(f"Error: {str(e)}", None, ""))
+        
+        self.update_status("Disassembling...", True)
+        threading.Thread(target=run_objdump, daemon=True).start()
+    
+    def _show_disassembly_window(self, output: str, scroll_to_addr: Optional[str], title_label: str):
+        self.update_status("Ready", False)
+        win = tk.Toplevel(self.root)
+        win.title(f"Disassembly (Intel): {title_label}")
+        win.geometry("800x550")
+        win.configure(bg='#1e1e1e')
+        txt = scrolledtext.ScrolledText(win, wrap=tk.WORD, font=('Consolas', 10), bg='#1e1e1e', fg='#d4d4d4')
+        txt.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        txt.insert(tk.END, output)
+        if scroll_to_addr and len(scroll_to_addr) >= 2:
+            idx = txt.search(scroll_to_addr, "1.0", tk.END)
+            if idx:
+                txt.see(idx)
+                txt.mark_set(tk.INSERT, idx)
+        txt.config(state='disabled')
+        tk.Button(win, text="Close", command=win.destroy, bg='#3498db', fg='white').pack(pady=5)
     
     def scan_vulnerabilities(self):
         if not self.binary_path:

@@ -22,7 +22,7 @@ ropper>=1.13.8  # For advanced ROP gadget finding (fallback to objdump if not in
 # The following external tools must be installed on your system:
 # - file (Linux: apt-get install file, macOS: brew install file)
 # - readelf (Linux: apt-get install binutils, macOS: brew install binutils)
-# - objdump (Linux: apt-get install binutils, macOS: brew install binutils)
+# - objdump (Linux: apt-get install binutils, macOS: brew install binutils) [REQUIRED for Disassembly (Intel) feature]
 # - nm (Linux: apt-get install binutils, macOS: brew install binutils)
 # - strings (Linux: apt-get install binutils, macOS: brew install binutils)
 # - checksec (optional: apt-get install checksec)
@@ -34,3 +34,6 @@ ropper>=1.13.8  # For advanced ROP gadget finding (fallback to objdump if not in
 # tkinter - GUI framework (comes with Python, may need: apt-get install python3-tk)
 # subprocess, os, time, threading, struct, re, json, tempfile, random, 
 # signal, hashlib, datetime, platform, sys, typing, traceback
+
+pytest
+pytest-cov

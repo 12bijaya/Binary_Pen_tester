@@ -73,6 +73,13 @@ The binary analysis engine provides comprehensive static analysis of executable 
 - File size and sections
 - Import/Export tables
 
+**Disassembly (Intel syntax, like GDB)**:
+- In the **Analysis** tab, after loading and analysing a binary, you can view **full disassembly in Intel syntax**.
+- Use the dropdown to select a function (optional); then click **"View disassembly (Intel)"**.
+- The tool runs `objdump -d -M intel <binary>` and shows the **entire** disassembly in a new window (same output as in the terminal).
+- If you selected a function, the window scrolls to that function’s address so you can find it quickly.
+- **Requires:** `objdump` from binutils (e.g. `apt install binutils` on Linux).
+
 ### 🛡️ Vulnerability Scanner
 
 Advanced static vulnerability detection with severity classification:
@@ -634,17 +641,22 @@ python3 scanner.py
    - Review the Analysis tab for security features
    - Note any interesting functions or missing protections
 
-3. **Find vulnerabilities**:
+3. **View disassembly (Intel)** (optional):
+   - In the Analysis tab, use the dropdown to select a function (optional)
+   - Click "View disassembly (Intel)" to open **full disassembly** in Intel syntax in a new window (same as `objdump -d -M intel <binary>`)
+   - Requires objdump (binutils: `apt install binutils`)
+
+4. **Find vulnerabilities**:
    - Click "🛡️ Vulnerability Scan"
    - Review the Vulnerabilities tab
    - Click individual vulnerabilities for details
 
-4. **Interactive testing**:
+5. **Interactive testing**:
    - Go to Interactive tab
    - Click "Start/Reset Session" (Local Binary mode)
    - Send test inputs and observe output
 
-5. **Fuzz for bugs**:
+6. **Fuzz for bugs**:
    - After sending inputs, click "Fuzz This Input"
    - Select fuzzing type (Format String or Buffer Overflow)
    - Review results
