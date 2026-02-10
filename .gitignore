@@ -1,1 +1,9 @@
 .gdb_history
+__pycache__/
+*.py[cod]
+*$py.class
+*.elf
+assignment.md
+code_explanation.md
+methodology.md
+ga

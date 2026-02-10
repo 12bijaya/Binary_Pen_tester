@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
+  <!-- Definitions for shadows and markers -->
+  <defs>
+    <filter id="dropShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="3" dy="3" stdDeviation="2" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+    <marker id="arrowhead" markerWidth="12" markerHeight="9" refX="11" refY="4.5" orient="auto">
+      <polygon points="0 0, 12 4.5, 0 9" fill="#333"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="12" markerHeight="9" refX="11" refY="4.5" orient="auto">
+      <polygon points="0 0, 12 4.5, 0 9" fill="#0277bd"/>
+    </marker>
+  </defs>
+
+  <!-- White Background -->
+  <rect width="100%" height="100%" fill="#ffffff" />
+
+  <!-- ========================================== -->
+  <!-- COMPONENT 1: TARGET BINARY INPUT -->
+  <!-- ========================================== -->
+  <g transform="translate(60, 60)">
+    <!-- Folder Tab -->
+    <path d="M 0,0 L 100,0 L 110,20 L 0,20 Z" fill="#fff" stroke="#333" stroke-width="2"/>
+    <text x="5" y="16" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Input Source</text>
+    <!-- Main Box -->
+    <rect x="0" y="20" width="200" height="100" rx="4" fill="#fcfcfc" stroke="#333" stroke-width="2" filter="url(#dropShadow)"/>
+    
+    <!-- Detail: Binary File Icon -->
+    <g transform="translate(25, 35)">
+      <rect x="0" y="0" width="45" height="55" fill="#e3f2fd" stroke="#2196f3" stroke-width="1.5"/>
+      <polygon points="45,0 45,15 30,15 30,0" fill="#bbdefb" /> <!-- folded corner -->
+      <text x="22.5" y="32" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#1565c0">Generic</text>
+      <text x="22.5" y="47" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#1565c0">Binary</text>
+    </g>
+
+    <!-- Detail: Remote Server Icon -->
+    <g transform="translate(100, 40)">
+      <rect x="0" y="0" width="60" height="45" rx="3" fill="#e8f5e9" stroke="#4caf50" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="48" y2="12" stroke="#81c784" stroke-width="2.5"/>
+      <circle cx="18" cy="30" r="3" fill="#4caf50"/>
+      <circle cx="30" cy="30" r="3" fill="#4caf50"/>
+      <text x="30" y="-8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#2e7d32">Remote</text>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- COMPONENT 2: CORE LOGIC ENGINE (Central) -->
+  <!-- ========================================== -->
+  <g transform="translate(320, 160)">
+    <!-- Folder Tab -->
+    <path d="M 0,0 L 180,0 L 190,20 L 0,20 Z" fill="#fff" stroke="#333" stroke-width="2"/>
+    <text x="5" y="16" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Core Logic Engine</text>
+    <!-- Main Box -->
+    <rect x="0" y="20" width="320" height="200" rx="4" fill="#fff" stroke="#333" stroke-width="2" filter="url(#dropShadow)"/>
+
+    <!-- Sub-component: Static Analysis -->
+    <g transform="translate(25, 40)">
+      <rect x="0" y="0" width="120" height="50" rx="3" fill="#fff3e0" stroke="#ff9800" stroke-width="1.5"/>
+      <text x="60" y="20" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#ef6c00">Static Analysis</text>
+      <text x="60" y="38" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="#555">ELF Headers, Syms</text>
+    </g>
+
+    <!-- Sub-component: Dynamic Fuzzing -->
+    <g transform="translate(170, 40)">
+      <rect x="0" y="0" width="120" height="50" rx="3" fill="#fce4ec" stroke="#e91e63" stroke-width="1.5"/>
+      <text x="60" y="20" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#c2185b">Dynamic Fuzzing</text>
+      <text x="60" y="38" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="#555">I/O Interaction</text>
+    </g>
+
+    <!-- Sub-component: Vulnerability Detector -->
+    <g transform="translate(95, 100)">
+      <rect x="0" y="0" width="130" height="40" rx="3" fill="#e8f5e9" stroke="#4caf50" stroke-width="1.5"/>
+      <text x="65" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2e7d32">Vuln Validation</text>
+    </g>
+
+    <!-- Sub-component: Exploit Builder -->
+    <g transform="translate(25, 150)">
+      <rect x="0" y="0" width="270" height="40" rx="3" fill="#f3e5f5" stroke="#9c27b0" stroke-width="1.5"/>
+      <text x="135" y="26" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#6a1b9a">Exploit Generator (pwntools)</text>
+    </g>
+
+    <!-- Connectors inside Engine -->
+    <path d="M 85 90 L 115 100" stroke="#999" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+    <path d="M 230 90 L 205 100" stroke="#999" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+    <path d="M 160 140 L 160 150" stroke="#999" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- COMPONENT 3: ARTIFACT OUTPUT (Left Bottom) -->
+  <!-- ========================================== -->
+  <g transform="translate(60, 400)">
+    <!-- Folder Tab -->
+    <path d="M 0,0 L 90,0 L 100,20 L 0,20 Z" fill="#fff" stroke="#333" stroke-width="2"/>
+    <text x="5" y="16" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Artifacts</text>
+    <!-- Main Box -->
+    <rect x="0" y="20" width="220" height="110" rx="4" fill="#fcfcfc" stroke="#333" stroke-width="2" filter="url(#dropShadow)"/>
+
+    <!-- Exploit File -->
+    <g transform="translate(30, 40)">
+      <rect x="0" y="0" width="45" height="55" fill="#fff8e1" stroke="#ffc107" stroke-width="1.5"/>
+      <polygon points="45,0 45,15 30,15 30,0" fill="#ffecb3" />
+      <text x="22.5" y="35" font-family="monospace" font-size="12" text-anchor="middle" fill="#ff6f00">exploit</text>
+      <text x="22.5" y="48" font-family="monospace" font-size="12" text-anchor="middle" fill="#ff6f00">.py</text>
+    </g>
+
+    <!-- Report File -->
+    <g transform="translate(95, 40)">
+      <rect x="0" y="0" width="45" height="55" fill="#eceff1" stroke="#607d8b" stroke-width="1.5"/>
+      <polygon points="45,0 45,15 30,15 30,0" fill="#cfd8dc" />
+      <text x="22.5" y="35" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#455a64">report</text>
+      <text x="22.5" y="48" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#455a64">.md</text>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- COMPONENT 4: GUI CONTROLLER (Right Bottom) -->
+  <!-- ========================================== -->
+  <g transform="translate(350, 420)">
+    <!-- Folder Tab -->
+    <path d="M 0,0 L 80,0 L 90,20 L 0,20 Z" fill="#fff" stroke="#333" stroke-width="2"/>
+    <text x="5" y="16" font-family="Arial, sans-serif" font-size="16" font-weight="bold">User GUI</text>
+    <!-- Main Box -->
+    <rect x="0" y="20" width="500" height="200" rx="4" fill="#fff" stroke="#333" stroke-width="2" filter="url(#dropShadow)"/>
+
+    <!-- Tkinter Window Representation -->
+    <g transform="translate(170, 35)">
+      <rect x="0" y="0" width="200" height="80" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="1.5" rx="3"/>
+      <rect x="0" y="0" width="200" height="20" fill="#bdbdbd" rx="3" stroke="none"/> <!-- window bar -->
+      <circle cx="12" cy="10" r="4" fill="#ef5350"/>
+      <circle cx="26" cy="10" r="4" fill="#ffca28"/>
+      <circle cx="40" cy="10" r="4" fill="#66bb6a"/>
+      <text x="100" y="55" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#424242">Dashboard</text>
+    </g>
+
+    <!-- Controls -->
+    <g transform="translate(25, 130)">
+        <rect x="0" y="0" width="110" height="45" rx="5" fill="#bbdefb" stroke="#1976d2" stroke-width="1.5"/>
+        <text x="55" y="28" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#0d47a1">Load Bin</text>
+
+        <rect x="130" y="0" width="110" height="45" rx="5" fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5"/>
+        <text x="185" y="28" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#1b5e20">Start Fuzz</text>
+
+        <rect x="260" y="0" width="110" height="45" rx="5" fill="#ffecb3" stroke="#ff8f00" stroke-width="1.5"/>
+        <text x="315" y="28" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#e65100">Run Exploit</text>
+    </g>
+
+    <!-- Console -->
+    <g transform="translate(390, 35)">
+        <rect x="0" y="0" width="90" height="130" fill="#212121" stroke="#000"/>
+        <text x="5" y="20" font-family="monospace" font-size="9" fill="#00e676">> Init...</text>
+        <text x="5" y="35" font-family="monospace" font-size="9" fill="#00e676">> Analyzing</text>
+        <text x="5" y="50" font-family="monospace" font-size="9" fill="#00e676">> NX: ON</text>
+        <text x="5" y="65" font-family="monospace" font-size="9" fill="#ef5350">> No Canary</text>
+        <text x="5" y="80" font-family="monospace" font-size="9" fill="#00e676">> Done.</text>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- ARROWS (Curved and Validating Flow) -->
+  <!-- ========================================== -->
+  
+  <!-- 1. Input Source -> Logic Engine -->
+  <path d="M 260 110 Q 300 110 330 180" fill="none" stroke="#555" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="270" y="145" font-family="Arial, sans-serif" font-size="14" fill="#555">Load &amp; Parse</text>
+
+  <!-- 2. Logic Engine -> Artifacts (Left) -->
+  <path d="M 320 280 Q 150 280 150 400" fill="none" stroke="#555" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="210" y="320" font-family="Arial, sans-serif" font-size="14" fill="#555">Save Results</text>
+
+  <!-- 3. Logic Engine -> GUI (Right) -->
+  <path d="M 520 360 L 520 415" fill="none" stroke="#0277bd" stroke-width="2.5" marker-end="url(#arrowhead-blue)"/>
+  <text x="530" y="395" font-family="Arial, sans-serif" font-size="14" fill="#0277bd">Feed Data</text>
+
+  <!-- 4. GUI Button Interaction -> logic -->
+  <text x="730" y="220" font-family="Arial, sans-serif" font-size="14" fill="#e65100">User Commands</text>
+  <path d="M 800 420 Q 860 200 640 200" fill="none" stroke="#e65100" stroke-width="2" stroke-dasharray="6" marker-end="url(#arrowhead)"/>
+
+</svg>

@@ -80,6 +80,80 @@ The code follows **secure programming** practices where relevant:
 
 This supports the outcome to “develop secure software through the application of standards and secure programming principles.”
 
+### 2.4 Concept Diagram
+
+Figure 1 illustrates the high-level architecture of the Binary Vulnerability Scanner. The workflow begins with the **Input Source**, where users can load a local binary or connect to a remote server. This input is processed by the **Core Logic Engine**, which orchestrates three key sub-components: **Static Analysis** for extracting metadata and protections, **Dynamic Fuzzing** for active probing and inputs, and **Vulnerability Validation** for confirming issues like buffer overflows. The engine's findings are then used by the **Exploit Generator** to produce usable exploit scripts. The entire process is controlled via the **User GUI**, which provides a dashboard for triggering scans and viewing real-time feedback, while the final results are persisted as **Exploit Scripts** and **Reports**.
+
+![Concept Diagram](concept_diagram.svg)  
+*Figure 1: Component & Interaction Concept Diagram*
+
+### 2.5 Runtime Architecture
+
+Figure 2 demonstrates the runtime behavior of the system using a sequence diagram. It details the chronological interactions between the **User** and the system components. The process initiates with **Startup** and dependency verification, followed by the **Analysis** phase (including the Disassembly workflow). The flow then transitions to **Interactive Fuzzing**, illustrating the logic for both local execution and remote TCP connections, and the crash detection loop. Finally, it shows the **Exploit Generation** and **Persistence** phases, where scripts are generated, executed, and results are saved to the file system.
+
+![Runtime Architecture](sequence_diagram.svg)  
+*Figure 2: Runtime Architecture (Sequence Diagram)*
+
+### 2.6 Algorithm and Flowchart
+
+The core logic of the Binary Vulnerability Scanner follows a systematic procedure to ensure comprehensive analysis. The algorithm is defined as follows:
+
+### 2.6 Algorithm and Flowchart
+
+The core logic of the Binary Vulnerability Scanner follows a systematic procedure to ensure comprehensive analysis. The algorithm is defined as follows:
+
+STEP 1: START
+STEP 2: Load the binary file provided by the user.
+STEP 2.1: Open the file selection dialog.
+STEP 2.2: Verify if the file path exists and is readable.
+STEP 3: Validate the file format.
+STEP 3.1: Check magic bytes to confirm it is a valid ELF executable.
+STEP 3.2: If invalid, display an error message and return to STEP 2.
+STEP 4: Perform Static Analysis.
+STEP 4.1: Run system tools to extract architecture (x86/x64) and endianness.
+STEP 4.2: Detect security protections (NX, PIE, Canary, RELRO).
+STEP 4.3: Extract symbol table to identify potentially dangerous functions.
+STEP 5: Perform Dynamic Fuzzing.
+STEP 5.1: Inject cyclic patterns or format string probes into the process.
+STEP 5.2: Monitor the process state for crashes (segmentation faults) or memory leaks.
+STEP 5.3: If a crash is detected, calculate the exact buffer offset.
+STEP 6: Generate Exploit.
+STEP 6.1: Select the exploit template based on the findings (e.g., Buffer Overflow).
+STEP 6.2: key in the calculated offset and target memory addresses.
+STEP 6.3: Generate the Python exploit script using the `pwntools` library.
+STEP 7: Output Results.
+STEP 7.1: Display the analysis summary in the GUI.
+STEP 7.2: Save the report and exploit script to the local file system.
+STEP 8: END
+
+![System Flowchart](flowchart.svg)  
+*Figure 3: System Algorithm Flowchart*
+
+---
+
+### 2.7 Tools and Technologies
+
+The following tools and technologies are used in this project:
+
+a. Python: The primary programming language used for developing the tool, chosen for its extensive library support and ease of use in security scripting.
+
+b. Tkinter: The standard Python interface to the Tcl/Tk GUI toolkit, used to create the graphical user interface.
+
+c. pwntools: A CTF framework and exploit development library used for binary interaction, packing data, and generating exploit scripts.
+
+d. Subprocess: A standard library module used to spawn new processes (like `readelf` or `objdump`), connect to their input/output/error pipes, and obtain their return codes.
+
+e. Threading: A module used to run time-consuming tasks (scanning, fuzzing) in background threads to keep the GUI responsive.
+
+f. JSON: Used for data persistence, allowing analysis results to be exported and saved in a structured format.
+
+g. Binutils: External system utilities (`readelf`, `objdump`, `nm`, `strings`) utilized for static binary analysis.
+
+These tools and technologies provide the necessary functionality for analyzing ELF binaries, detecting vulnerabilities, and generating reliable exploits.
+
+![Technology Stack](tech_stack.svg)  
+*Figure 4: Project Technology Stack*
+
 ---
 
 ## 3. Implementation
@@ -151,7 +225,10 @@ The project uses **third-party libraries** and **system tools** as required for 
 - **tkinter:** Standard library; used for the GUI (windows, buttons, text areas, tabs).
 - **System tools:** file, readelf, objdump, nm, strings, and optionally checksec and gdb are run via subprocess. Their output is **parsed with custom code** (regex and line-by-line logic), not external parsing libraries. **objdump** is also used for the **disassembly feature** with *-M intel* for Intel syntax.
 
-Together, this shows “use of a third-party library and the techniques” and “application uses different structure and use of library given by the programming language.” The standard library (tkinter, subprocess, os, threading, json, etc.) is also used for GUI, process management, and persistence.
+Together, this shows "use of a third-party library and the techniques" and "application uses different structure and use of library given by the programming language." The standard library (tkinter, subprocess, os, threading, json, etc.) is also used for GUI, process management, and persistence.
+
+> [!NOTE]
+> **Detailed code explanation:** For in-depth technical explanations of all classes, algorithms, data structures, and design patterns used in this project, please refer to [`code_explanation.md`](code_explanation.md). This separate document provides comprehensive code walkthroughs demonstrating OOP principles, custom algorithms with complexity analysis, efficient data structures, secure programming practices, multi-threading implementation, and adherence to Python conventions.
 
 ---
 

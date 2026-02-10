@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 950">
+  <defs>
+    <marker id="arrowhead" markerWidth="12" markerHeight="9" refX="11" refY="4.5" orient="auto">
+      <polygon points="0 0, 12 4.5, 0 9" fill="#333"/>
+    </marker>
+    <style>
+      .lifeline { stroke: #888; stroke-width: 1.5; stroke-dasharray: 6; }
+      .box { fill: #e3f2fd; stroke: #555; stroke-width: 1.5; }
+      .box-text { font-family: Arial; font-size: 16px; font-weight: bold; text-anchor: middle; fill: #333; }
+      .msg-text { font-family: Arial; font-size: 14px; fill: #444; background-color: white; }
+      .arrow { stroke: #333; stroke-width: 1.5; marker-end: url(#arrowhead); }
+      .arrow-dash { stroke: #333; stroke-width: 1.5; stroke-dasharray: 6; marker-end: url(#arrowhead); }
+      .alt-box { fill: none; stroke: #000; stroke-width: 1.5; }
+      .alt-label { font-family: Arial; font-size: 14px; font-weight: bold; fill: #000; }
+      .alt-divider { stroke: #000; stroke-width: 1.5; stroke-dasharray: 4; }
+      .actor-head { fill: #fff; stroke: #333; stroke-width: 1.5; }
+      .actor-body { stroke: #333; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#ffffff" />
+
+  <!-- LIFELINES -->
+  <line x1="50" y1="80" x2="50" y2="900" class="lifeline" /> <!-- User -->
+  <line x1="200" y1="80" x2="200" y2="900" class="lifeline" /> <!-- GUI -->
+  <line x1="380" y1="80" x2="380" y2="900" class="lifeline" /> <!-- Analyzer -->
+  <line x1="560" y1="80" x2="560" y2="900" class="lifeline" /> <!-- Fuzzer/Interactive -->
+  <line x1="740" y1="80" x2="740" y2="900" class="lifeline" /> <!-- ExploitGen -->
+  <line x1="920" y1="80" x2="920" y2="900" class="lifeline" /> <!-- File Sys -->
+
+  <!-- HEADERS -->
+  <circle cx="50" cy="40" r="10" class="actor-head" />
+  <line x1="50" y1="50" x2="50" y2="70" class="actor-body" />
+  <line x1="35" y1="55" x2="65" y2="55" class="actor-body" />
+  <line x1="50" y1="70" x2="35" y2="85" class="actor-body" />
+  <line x1="50" y1="70" x2="65" y2="85" class="actor-body" />
+  <text x="50" y="25" class="box-text">User</text>
+
+  <rect x="140" y="30" width="120" height="35" class="box" />
+  <text x="200" y="52" class="box-text">Tkinter GUI</text>
+
+  <rect x="320" y="30" width="120" height="35" class="box" />
+  <text x="380" y="52" class="box-text">Analyzer</text>
+
+  <rect x="500" y="30" width="120" height="35" class="box" />
+  <text x="560" y="52" class="box-text">Fuzzer</text>
+
+  <rect x="680" y="30" width="120" height="35" class="box" />
+  <text x="740" y="52" class="box-text">ExploitGen</text>
+
+  <rect x="860" y="30" width="120" height="35" class="box" />
+  <text x="920" y="52" class="box-text">File System</text>
+
+  <!-- FOOTERS -->
+  <rect x="140" y="900" width="120" height="35" class="box" />
+  <text x="200" y="922" class="box-text">GUI</text>
+
+  <rect x="320" y="900" width="120" height="35" class="box" />
+  <text x="380" y="922" class="box-text">Analyzer</text>
+
+  <rect x="500" y="900" width="120" height="35" class="box" />
+  <text x="560" y="922" class="box-text">Fuzzer</text>
+
+  <rect x="680" y="900" width="120" height="35" class="box" />
+  <text x="740" y="922" class="box-text">ExploitGen</text>
+
+  <rect x="860" y="900" width="120" height="35" class="box" />
+  <text x="920" y="922" class="box-text">File Sys</text>
+
+
+  <!-- ======================== -->
+  <!-- 1. STARTUP & DEPENDENCY CHECK -->
+  <!-- ======================== -->
+  <line x1="50" y1="100" x2="200" y2="100" class="arrow" />
+  <text x="125" y="92" class="msg-text">Start App</text>
+
+  <line x1="200" y1="120" x2="380" y2="120" class="arrow" />
+  <text x="290" y="112" class="msg-text">check_deps()</text>
+
+  <line x1="380" y1="140" x2="200" y2="140" class="arrow-dash" />
+  <text x="290" y="132" class="msg-text">OK</text>
+
+
+  <!-- ======================== -->
+  <!-- 2. ANALYSIS & DISASSEMBLY -->
+  <!-- ======================== -->
+  <line x1="50" y1="170" x2="200" y2="170" class="arrow" />
+  <text x="125" y="162" class="msg-text">Load Binary</text>
+
+  <line x1="200" y1="190" x2="380" y2="190" class="arrow" />
+  <text x="290" y="182" class="msg-text">analyze(path)</text>
+
+  <line x1="380" y1="210" x2="920" y2="210" class="arrow" />
+  <text x="650" y="202" class="msg-text">Read Headers &amp; Symbols</text>
+
+  <line x1="380" y1="230" x2="200" y2="230" class="arrow-dash" />
+  <text x="290" y="222" class="msg-text">Display Info</text>
+
+  <!-- Disassembly Feature Loop -->
+  <rect x="40" y="245" width="910" height="90" class="alt-box" />
+  <path d="M 40,245 L 110,245 L 120,265 L 40,265 Z" fill="#fff" stroke="#000" stroke-width="1.5"/>
+  <text x="75" y="258" class="alt-label" text-anchor="middle">Disassembly</text>
+
+  <line x1="50" y1="275" x2="200" y2="275" class="arrow" />
+  <text x="125" y="267" class="msg-text">Select Func + View</text>
+
+  <line x1="200" y1="295" x2="380" y2="295" class="arrow" />
+  <text x="290" y="287" class="msg-text">run_objdump(intel)</text>
+
+  <line x1="380" y1="315" x2="200" y2="315" class="arrow-dash" />
+  <text x="290" y="307" class="msg-text">Show Assembly</text>
+
+
+  <!-- ======================== -->
+  <!-- 3. INTERACTIVE FUZZING (Local/Remote) -->
+  <!-- ======================== -->
+  <line x1="50" y1="365" x2="200" y2="365" class="arrow" />
+  <text x="125" y="357" class="msg-text">Start Interactive</text>
+
+  <rect x="180" y="380" width="400" height="85" class="alt-box" />
+  <path d="M 180,380 L 250,380 L 260,400 L 180,400 Z" fill="#fff" stroke="#000" stroke-width="1.5"/>
+  <text x="215" y="393" class="alt-label" text-anchor="middle">Connection</text>
+
+  <line x1="200" y1="410" x2="560" y2="410" class="arrow" />
+  <text x="380" y="402" class="msg-text">Local / Remote TCP</text>
+  <line x1="200" y1="430" x2="560" y2="430" class="alt-divider" />
+  <text x="215" y="445" class="alt-label">Remote</text>
+  <line x1="200" y1="450" x2="560" y2="450" class="arrow" />
+  <text x="380" y="442" class="msg-text">pwntools.remote(IP,Port)</text>
+
+
+  <line x1="50" y1="490" x2="200" y2="490" class="arrow" />
+  <text x="125" y="482" class="msg-text">Fuzz This Input</text>
+
+  <line x1="200" y1="510" x2="560" y2="510" class="arrow" />
+  <text x="380" y="502" class="msg-text">run_fuzz_patterns()</text>
+
+  <line x1="560" y1="530" x2="560" y2="560" class="arrow">
+     <animate attributeName="y2" from="530" to="560" dur="0.2s" fill="freeze" />
+  </line>
+  <polyline points="560,530 590,530 590,560 560,560" fill="none" stroke="#333" stroke-width="1.5" />
+  <text x="625" y="550" class="msg-text">Detect Crash</text>
+
+  <line x1="560" y1="580" x2="200" y2="580" class="arrow-dash" />
+  <text x="380" y="572" class="msg-text">Return Offset / Leak</text>
+
+
+  <!-- ======================== -->
+  <!-- 4. EXPLOIT & PERSISTENCE -->
+  <!-- ======================== -->
+  <line x1="50" y1="630" x2="200" y2="630" class="arrow" />
+  <text x="125" y="622" class="msg-text">Generate Exploit</text>
+
+  <line x1="200" y1="650" x2="740" y2="650" class="arrow" />
+  <text x="470" y="642" class="msg-text">create_script()</text>
+
+  <line x1="740" y1="670" x2="200" y2="670" class="arrow-dash" />
+  <text x="470" y="662" class="msg-text">Return Python</text>
+
+  <line x1="50" y1="700" x2="200" y2="700" class="arrow" />
+  <text x="125" y="692" class="msg-text">Run Exploit</text>
+
+  <line x1="200" y1="720" x2="560" y2="720" class="arrow" />
+  <text x="380" y="712" class="msg-text">Exec Script + PostCmds</text>
+
+  <line x1="200" y1="760" x2="740" y2="760" class="arrow" />
+  <text x="470" y="752" class="msg-text">Export Findings</text>
+
+  <!-- Save Loop -->
+  <rect x="180" y="780" width="760" height="70" class="alt-box" />
+  <path d="M 180,780 L 230,780 L 240,795 L 180,795 Z" fill="#fff" stroke="#000" stroke-width="1.5"/>
+  <text x="210" y="792" class="alt-label" text-anchor="middle">Save</text>
+
+  <line x1="740" y1="810" x2="920" y2="810" class="arrow" />
+  <text x="830" y="802" class="msg-text">write_json/txt()</text>
+
+  <line x1="920" y1="830" x2="200" y2="830" class="arrow-dash" />
+  <text x="560" y="822" class="msg-text">Confirm Save</text>
+
+</svg>
