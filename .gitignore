@@ -3,7 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.elf
-assignment.md
-code_explanation.md
-methodology.md
-ga
+bof
+fmt
+
+# Ignore all .md files except README.md
+*.md
+!README.md

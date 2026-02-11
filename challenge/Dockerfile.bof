@@ -1,0 +1,9 @@
+FROM ubuntu:22.04
+RUN apt-get update && apt-get install -y gcc gcc-multilib make socat && rm -rf /var/lib/apt/lists/*
+RUN useradd -m ctf
+WORKDIR /home/ctf
+COPY bof.c .
+RUN gcc -o bof bof.c -fno-stack-protector -z execstack -no-pie -fno-pie -Wno-implicit-function-declaration
+RUN chown -R root:ctf /home/ctf && chmod 750 /home/ctf/bof && chmod 440 /home/ctf/bof.c
+EXPOSE 1337
+CMD ["socat", "TCP-LISTEN:1337,reuseaddr,fork", "EXEC:/home/ctf/bof,stderr"]
