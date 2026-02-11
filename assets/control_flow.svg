@@ -1,0 +1,241 @@
+<svg width="1800" height="1400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#1e1e2e" />
+  
+  <style>
+    .title { font: bold 32px sans-serif; fill: #cba6f7; }
+    .class-box { fill: #313244; stroke: #45475a; stroke-width: 2; rx: 10; ry: 10; }
+    .class-header { font: bold 18px sans-serif; fill: #89b4fa; }
+    .method-text { font: 12px monospace; fill: #cdd6f4; }
+    .flow-line { fill: none; stroke: #585b70; stroke-width: 2; marker-end: url(#arrowhead); }
+    .module-label { font: bold 22px sans-serif; fill: #f5e0dc; }
+  </style>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#585b70" />
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+      <feOffset dx="2" dy="2" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="50" y="50" class="title">Binary Vulnerability Scanner &amp; Fuzzer - Control Flow</text>
+
+  <!-- Entry Point -->
+  <g transform="translate(800, 80)">
+    <rect width="200" height="60" class="class-box" filter="url(#shadow)" />
+    <text x="100" y="35" text-anchor="middle" class="class-header">main()</text>
+    <text x="100" y="55" text-anchor="middle" class="method-text">Entry point of the application</text>
+  </g>
+
+  <!-- GUI Hub -->
+  <g transform="translate(650, 200)">
+    <rect width="500" height="500" class="class-box" filter="url(#shadow)" />
+    <text x="250" y="30" text-anchor="middle" class="class-header">BinaryVulnScannerGUI</text>
+    <line x1="20" y1="40" x2="480" y2="40" stroke="#45475a" stroke-width="1" />
+    
+    <text x="30" y="65" class="method-text">__init__(root)</text>
+    <text x="30" y="80" class="method-text">_check_dependencies()</text>
+    <text x="30" y="95" class="method-text">_create_gui()</text>
+    <text x="30" y="110" class="method-text">_create_notebook(parent)</text>
+    <text x="30" y="125" class="method-text">load_binary()</text>
+    <text x="30" y="140" class="method-text">analyze_binary()</text>
+    <text x="30" y="155" class="method-text">display_analysis(results)</text>
+    <text x="30" y="170" class="method-text">show_disassembly_intel()</text>
+    <text x="30" y="185" class="method-text">scan_vulnerabilities()</text>
+    <text x="30" y="200" class="method-text">display_vulnerabilities(results)</text>
+    <text x="30" y="215" class="method-text">interactive_analysis()</text>
+    <text x="30" y="230" class="method-text">start_interactive_session()</text>
+    <text x="30" y="245" class="method-text">send_custom_input()</text>
+    <text x="30" y="260" class="method-text">fuzz_custom_input()</text>
+    <text x="30" y="275" class="method-text">calculate_offset()</text>
+    <text x="30" y="290" class="method-text">generate_exploit()</text>
+    <text x="30" y="305" class="method-text">run_exploit()</text>
+    <text x="30" y="320" class="method-text">stop_exploit()</text>
+    <text x="30" y="335" class="method-text">show_statistics()</text>
+    <text x="30" y="350" class="method-text">export_results()</text>
+    
+    <text x="260" y="65" class="method-text">_create_left_panel(parent)</text>
+    <text x="260" y="80" class="method-text">_create_analysis_tab(notebook)</text>
+    <text x="260" y="95" class="method-text">_create_vulnerabilities_tab(notebook)</text>
+    <text x="260" y="110" class="method-text">_create_interactive_tab(notebook)</text>
+    <text x="260" y="125" class="method-text">_create_exploit_tab(notebook)</text>
+    <text x="260" y="140" class="method-text">_create_gadgets_tab()</text>
+    <text x="260" y="155" class="method-text">_create_code_editor_tab()</text>
+    <text x="260" y="170" class="method-text">load_file_to_editor()</text>
+    <text x="260" y="185" class="method-text">_find_gadgets()</text>
+    <text x="260" y="200" class="method-text">display_gadgets(gadgets)</text>
+    <text x="260" y="215" class="method-text">_fuzz_format_string(history)</text>
+    <text x="260" y="230" class="method-text">_fuzz_buffer_overflow(history)</text>
+    <text x="260" y="245" class="method-text">_classify_leak(val_str)</text>
+    <text x="260" y="260" class="method-text">_identify_leak_type(address)</text>
+    <text x="260" y="275" class="method-text">log(message)</text>
+    <text x="260" y="290" class="method-text">update_status(message)</text>
+    <text x="260" y="305" class="method-text">clear_log()</text>
+    <text x="260" y="320" class="method-text">on_vuln_select(event)</text>
+    <text x="260" y="335" class="method-text">on_gadget_select(event)</text>
+  </g>
+
+  <!-- Binary Analyzer -->
+  <g transform="translate(50, 400)">
+    <rect width="250" height="300" class="class-box" filter="url(#shadow)" />
+    <text x="125" y="30" text-anchor="middle" class="class-header">BinaryAnalyzer</text>
+    <line x1="20" y1="40" x2="230" y2="40" stroke="#45475a" stroke-width="1" />
+    <text x="30" y="65" class="method-text">__init__(binary_path)</text>
+    <text x="30" y="85" class="method-text">analyze()</text>
+    <text x="30" y="105" class="method-text">_get_basic_info()</text>
+    <text x="30" y="125" class="method-text">_get_architecture()</text>
+    <text x="30" y="145" class="method-text">_get_protections()</text>
+    <text x="30" y="165" class="method-text">_get_sections()</text>
+    <text x="30" y="185" class="method-text">_get_symbols()</text>
+    <text x="30" y="205" class="method-text">_get_imports()</text>
+    <text x="30" y="225" class="method-text">_get_strings()</text>
+    <text x="30" y="245" class="method-text">_get_entry_point()</text>
+  </g>
+
+  <!-- ROP Gadget Finder -->
+  <g transform="translate(50, 750)">
+    <rect width="250" height="200" class="class-box" filter="url(#shadow)" />
+    <text x="125" y="30" text-anchor="middle" class="class-header">ROPGadgetFinder</text>
+    <line x1="20" y1="40" x2="230" y2="40" stroke="#45475a" stroke-width="1" />
+    <text x="30" y="65" class="method-text">__init__(binary_path)</text>
+    <text x="30" y="85" class="method-text">find_gadgets()</text>
+    <text x="30" y="105" class="method-text">_find_gadgets_ropper()</text>
+    <text x="30" y="125" class="method-text">_find_gadgets_objdump()</text>
+    <text x="30" y="145" class="method-text">_detect_arch()</text>
+    <text x="30" y="165" class="method-text">find_libc_addresses()</text>
+  </g>
+
+  <!-- Vulnerability Scanner -->
+  <g transform="translate(350, 750)">
+    <rect width="250" height="250" class="class-box" filter="url(#shadow)" />
+    <text x="125" y="30" text-anchor="middle" class="class-header">VulnerabilityScanner</text>
+    <line x1="20" y1="40" x2="230" y2="40" stroke="#45475a" stroke-width="1" />
+    <text x="30" y="65" class="method-text">__init__(binary_path)</text>
+    <text x="30" y="85" class="method-text">scan(depth)</text>
+    <text x="30" y="105" class="method-text">_static_analysis()</text>
+    <text x="30" y="125" class="method-text">_test_buffer_overflow()</text>
+    <text x="30" y="145" class="method-text">_test_format_string()</text>
+    <text x="30" y="165" class="method-text">_interactive_analysis()</text>
+    <text x="30" y="185" class="method-text">_summarize_results()</text>
+  </g>
+
+  <!-- Intelligent Fuzzer -->
+  <g transform="translate(1200, 200)">
+    <rect width="300" height="450" class="class-box" filter="url(#shadow)" />
+    <text x="150" y="30" text-anchor="middle" class="class-header">IntelligentFuzzer</text>
+    <line x1="20" y1="40" x2="280" y2="40" stroke="#45475a" stroke-width="1" />
+    <text x="30" y="65" class="method-text">__init__(binary_path)</text>
+    <text x="30" y="85" class="method-text">discover_menu(max_depth)</text>
+    <text x="30" y="105" class="method-text">fuzz_menu_option(option)</text>
+    <text x="30" y="125" class="method-text">run_comprehensive_fuzzing()</text>
+    <text x="30" y="145" class="method-text">calculate_buffer_offset()</text>
+    <text x="30" y="165" class="method-text">calculate_format_string_offset()</text>
+    <text x="30" y="185" class="method-text">_generate_smart_test_cases()</text>
+    <text x="30" y="205" class="method-text">_analyze_crash(payload)</text>
+    <text x="30" y="225" class="method-text">_detect_leaks(output)</text>
+    <text x="30" y="245" class="method-text">_binary_search_offset()</text>
+    <text x="30" y="265" class="method-text">_analyze_output_for_menu()</text>
+    <text x="30" y="285" class="method-text">_explore_options()</text>
+    <text x="30" y="305" class="method-text">_test_input_point()</text>
+    <text x="30" y="325" class="method-text">_calculate_offset()</text>
+    <text x="30" y="345" class="method-text">stop()</text>
+  </g>
+
+  <!-- Exploit Generator -->
+  <g transform="translate(1200, 700)">
+    <rect width="300" height="300" class="class-box" filter="url(#shadow)" />
+    <text x="150" y="30" text-anchor="middle" class="class-header">ExploitGenerator</text>
+    <line x1="20" y1="40" x2="280" y2="40" stroke="#45475a" stroke-width="1" />
+    <text x="30" y="65" class="method-text">generate_buffer_overflow()</text>
+    <text x="30" y="85" class="method-text">generate_format_string()</text>
+    <text x="30" y="105" class="method-text">generate_rop_chain()</text>
+    <text x="30" y="125" class="method-text">generate_ret2win()</text>
+    <text x="30" y="145" class="method-text">generate_ret2libc()</text>
+    <text x="30" y="165" class="method-text">generate_ret2plt()</text>
+    <text x="30" y="185" class="method-text">generate_shellcode_injection()</text>
+    <text x="30" y="205" class="method-text">generate_dynamic_exploit()</text>
+    <text x="30" y="225" class="method-text">get_prompt(text)</text>
+  </g>
+
+  <!-- Binary Runner (Execution layer) -->
+  <g transform="translate(800, 1050)">
+    <rect width="300" height="200" class="class-box" filter="url(#shadow)" />
+    <text x="150" y="30" text-anchor="middle" class="class-header">BinaryRunner</text>
+    <line x1="20" y1="40" x2="280" y2="40" stroke="#45475a" stroke-width="1" />
+    <text x="30" y="65" class="method-text">__init__(binary_path)</text>
+    <text x="30" y="85" class="method-text">run(input_data)</text>
+    <text x="30" y="105" class="method-text">run_interactive(inputs)</text>
+    <text x="30" y="125" class="method-text">_create_process()</text>
+    <text x="30" y="145" class="method-text">_kill_process()</text>
+    <text x="30" y="165" class="method-text">_is_crash(returncode)</text>
+  </g>
+
+  <!-- Interactive Session -->
+  <g transform="translate(450, 1050)">
+    <rect width="300" height="220" class="class-box" filter="url(#shadow)" />
+    <text x="150" y="30" text-anchor="middle" class="class-header">InteractiveSession</text>
+    <line x1="20" y1="40" x2="280" y2="40" stroke="#45475a" stroke-width="1" />
+    <text x="30" y="65" class="method-text">__init__(binary_path, remote)</text>
+    <text x="30" y="85" class="method-text">start()</text>
+    <text x="30" y="105" class="method-text">start_remote()</text>
+    <text x="30" y="125" class="method-text">send(data)</text>
+    <text x="30" y="145" class="method-text">get_output()</text>
+    <text x="30" y="165" class="method-text">_read_output(pipe)</text>
+    <text x="30" y="185" class="method-text">_read_pwn_output()</text>
+    <text x="30" y="205" class="method-text">stop()</text>
+  </g>
+
+  <!-- Pattern Generator & Global Helpers -->
+  <g transform="translate(1200, 1050)">
+    <rect width="300" height="150" class="class-box" filter="url(#shadow)" />
+    <text x="150" y="30" text-anchor="middle" class="class-header">Utilities</text>
+    <line x1="20" y1="40" x2="280" y2="40" stroke="#45475a" stroke-width="1" />
+    <text x="30" y="65" class="method-text">PatternGenerator.create(length)</text>
+    <text x="30" y="85" class="method-text">PatternGenerator.offset(value)</text>
+    <text x="30" y="105" class="method-text">Logger.log(message)</text>
+    <text x="30" y="125" class="method-text">DependencyChecker.check_tools()</text>
+  </g>
+
+  <!-- Connections -->
+  <!-- main to GUI -->
+  <path d="M 900 140 L 900 200" class="flow-line" />
+  
+  <!-- GUI to Analyzer -->
+  <path d="M 650 450 L 300 450" class="flow-line" />
+  
+  <!-- GUI to VulnerabilityScanner -->
+  <path d="M 650 650 L 475 650 L 475 750" class="flow-line" />
+  
+  <!-- GUI to IntelligentFuzzer -->
+  <path d="M 1150 425 L 1200 425" class="flow-line" />
+  
+  <!-- GUI to ExploitGenerator -->
+  <path d="M 1150 675 L 1250 675 L 1250 700" class="flow-line" />
+  
+  <!-- GUI to InteractiveSession -->
+  <path d="M 700 700 L 700 1020 L 600 1020 L 600 1050" class="flow-line" />
+  
+  <!-- Analyzer to ROPGadgetFinder -->
+  <path d="M 175 700 L 175 750" class="flow-line" />
+  
+  <!-- Fuzzer/Scanner to BinaryRunner -->
+  <path d="M 1350 650 L 1350 1030 L 950 1030 L 950 1050" class="flow-line" />
+  <path d="M 500 1000 L 500 1030 L 850 1030 L 850 1050" class="flow-line" />
+
+  <!-- Labels for Flow Stages -->
+  <text x="50" y="380" class="module-label">Analysis Layer</text>
+  <text x="1200" y="180" class="module-label">Fuzzing &amp; Exploitation</text>
+  <text x="450" y="1030" class="module-label">Execution &amp; Session Layer</text>
+
+</svg>
